@@ -26,22 +26,73 @@ body {
 }
 
 header {
-  background: linear-gradient(135deg, #5b9fd6, #3a7bbf);
+  background: linear-gradient(135deg, #2b7cb9, #1a5a8a);
   color: #fff;
-  text-align: center;
-  padding: 24px 16px 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  padding: 20px 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+header img.logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,0.3);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+  flex-shrink: 0;
+}
+
+.header-text {
+  flex: 1;
 }
 
 header h1 {
   font-family: 'Fredoka One', cursive;
-  font-size: 2rem;
-  margin-bottom: 4px;
+  font-size: 1.8rem;
+  margin-bottom: 2px;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  letter-spacing: 0.5px;
 }
 
 header p {
-  font-size: 0.95rem;
-  opacity: 0.9;
+  font-size: 0.9rem;
+  opacity: 0.85;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Info banner */
+.info-section {
+  background: linear-gradient(135deg, #e8f4fd, #d4ecfa);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  border-left: 4px solid #3a7bbf;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.info-section strong {
+  color: #c45c00;
+}
+
+.info-section p {
+  margin-bottom: 6px;
+}
+
+.info-section p:last-child {
+  margin-bottom: 0;
 }
 
 .container {
@@ -58,6 +109,15 @@ header p {
   color: var(--white);
 }
 
+.section-subtext {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5a7a8a;
+  font-style: italic;
+  margin: -8px 0 12px;
+  line-height: 1.4;
+}
+
 /* Customer info */
 .customer-section {
   background: var(--ocean-mid);
@@ -72,6 +132,23 @@ header p {
   font-size: 0.85rem;
   margin-bottom: 4px;
   margin-top: 12px;
+}
+
+.customer-section label .required {
+  color: #c0392b;
+  margin-left: 2px;
+}
+
+.customer-section input.invalid {
+  border-color: #c0392b;
+}
+
+.validation-msg {
+  color: #c0392b;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-top: 6px;
+  display: none;
 }
 
 .customer-section label:first-child {
@@ -199,6 +276,29 @@ header p {
   border: 2px solid transparent;
   transition: border-color 0.2s, background 0.2s;
   text-align: center;
+  position: relative;
+}
+
+.prep-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  transition: all 0.2s;
+}
+
+.prep-block.active .prep-check {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
 }
 
 .prep-block:hover {
@@ -227,10 +327,11 @@ header p {
 }
 
 .prep-price {
-  font-size: 0.72rem;
-  color: var(--gold-light);
+  font-size: 0.75rem;
+  color: #5a7a8a;
   font-weight: 600;
-  margin-top: 2px;
+  margin-top: 4px;
+  font-style: italic;
 }
 
 /* Weight buttons inside prep block */
@@ -247,36 +348,43 @@ header p {
 }
 
 .weight-btn {
-  padding: 5px 10px;
-  border: none;
-  border-radius: 6px;
+  padding: 7px 14px;
+  border: 2px solid #b8d9f8;
+  border-radius: 20px;
   font-family: 'Nunito', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  background: rgba(255,255,255,0.7);
+  background: #fff;
   color: var(--white);
-  transition: background 0.15s, color 0.15s;
+  transition: all 0.15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
 .weight-btn:hover {
-  background: var(--gold-light);
-  color: #fff;
+  border-color: var(--gold);
+  background: #fff5e6;
+  color: var(--gold);
 }
 
 .weight-btn.chosen {
   background: var(--gold);
   color: #fff;
+  border-color: var(--gold);
+  box-shadow: 0 2px 6px rgba(230,126,0,0.3);
 }
 
 .weight-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
-  background: rgba(0,0,0,0.1);
+  background: #eee;
+  border-color: #ddd;
+  box-shadow: none;
 }
 
 .weight-btn:disabled:hover {
-  background: rgba(0,0,0,0.1);
+  background: #eee;
+  border-color: #ddd;
   color: var(--white);
 }
 
@@ -329,6 +437,19 @@ header p {
 .option-btn.active {
   border-color: var(--gold);
   background: rgba(230, 126, 0, 0.15);
+}
+
+.question-group.disabled-group {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.question-group .disabled-hint {
+  font-size: 0.75rem;
+  font-style: italic;
+  font-weight: 600;
+  opacity: 0.7;
+  margin-top: 4px;
 }
 
 /* Order summary */
@@ -407,7 +528,9 @@ header p {
 }
 
 @media (max-width: 400px) {
-  header h1 { font-size: 1.5rem; }
+  header h1 { font-size: 1.4rem; }
+  header img.logo { width: 64px; height: 64px; }
+  .header-inner { gap: 12px; }
   .prep-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>
@@ -415,21 +538,32 @@ header p {
 <body>
 
 <header>
-  <h1>Fishy Weekend</h1>
-  <p>Fresh fish, delivered to your door every weekend</p>
+  <div class="header-inner">
+    <img src="fishy_weekend_logo.jpg" alt="Fishy Weekend Logo" class="logo">
+    <div class="header-text">
+      <h1>Fishy Weekend</h1>
+      <p>Fresh, Cleaned & Cooked Every Saturday!</p>
+    </div>
+  </div>
 </header>
 
 <div class="container">
 
+  <div class="info-section">
+    <p><strong>Orders / Delivery</strong></p>
+    <p>Place your order <strong>before Thursday 10:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday.</p>
+    <p>At the moment, we deliver <strong>only within Almere</strong>, but we're working on expanding delivery to other regions.</p>
+  </div>
+
   <div class="section-title">Your Details</div>
   <div class="customer-section">
-    <label for="cust-name">Name</label>
+    <label for="cust-name">Name <span class="required">*</span></label>
     <input type="text" id="cust-name" placeholder="Your name">
 
-    <label for="cust-phone">Phone Number</label>
+    <label for="cust-phone">Phone Number <span class="required">*</span></label>
     <input type="tel" id="cust-phone" placeholder="+31 6 1234 5678" value="+31 ">
 
-    <label>Address</label>
+    <label>Address <span class="required">*</span></label>
     <div class="address-row">
       <div>
         <input type="text" id="cust-postal" placeholder="Postal code (e.g. 1363VS)">
@@ -438,20 +572,23 @@ header p {
         <input type="text" id="cust-door" placeholder="Door # (e.g. 88)">
       </div>
     </div>
+    <div class="validation-msg" id="customer-validation-msg">Please fill in all your details above to place an order.</div>
   </div>
 
   <div class="section-title">Choose Your Fish</div>
+  <div class="section-subtext">We supply larger-sized fish, ensuring superior taste and better cuts for an elegant presentation on your menu.</div>
   <div id="fish-grid"></div>
 
-  <div class="section-title">Other Questions</div>
+  <div class="section-title">Additional Details</div>
   <div class="questions-section">
     <div class="question-group">
       <label>Do you need Fish head?</label>
       <div class="option-buttons" id="fishhead-options"></div>
     </div>
-    <div class="question-group" id="spicy-group" style="display:none;">
+    <div class="question-group disabled-group" id="spicy-group">
       <label>What Spicy Level do you need?</label>
       <div class="option-buttons" id="spicy-options"></div>
+      <div class="disabled-hint" id="spicy-hint">Select a Curry or Fry preparation to choose spicy level</div>
     </div>
   </div>
 
@@ -505,6 +642,23 @@ header p {
   var fishHeadAnswer = null;   // 'yes' or 'no'
   var spicyLevel     = null;   // 'low', 'medium', 'high', 'no-preference'
 
+  /* ── VALIDATION ── */
+
+  function getCustomerDetails() {
+    return {
+      name:   document.getElementById('cust-name').value.trim(),
+      phone:  document.getElementById('cust-phone').value.trim(),
+      postal: document.getElementById('cust-postal').value.trim(),
+      door:   document.getElementById('cust-door').value.trim()
+    };
+  }
+
+  function isCustomerComplete() {
+    var c = getCustomerDetails();
+    // Phone must be more than just the "+31 " prefix
+    return c.name.length > 0 && c.phone.length > 4 && c.postal.length > 0 && c.door.length > 0;
+  }
+
   /* ── RENDER ── */
 
   function renderAll() {
@@ -547,7 +701,7 @@ header p {
         if (!fish.available) {
           var unavailLabel = document.createElement('span');
           unavailLabel.className = 'unavailable-label';
-          unavailLabel.textContent = 'Unavailable';
+          unavailLabel.textContent = 'Unavailable at the moment';
           header.appendChild(unavailLabel);
         }
 
@@ -598,6 +752,11 @@ header p {
             priceDiv.className = 'prep-price';
             priceDiv.textContent = price !== null && price !== undefined ? '\u20AC' + price.toFixed(2) + ' / 500g' : '';
 
+            var checkDiv = document.createElement('div');
+            checkDiv.className = 'prep-check';
+            checkDiv.textContent = prepActive[key] ? '\u2713' : '';
+
+            block.appendChild(checkDiv);
             block.appendChild(iconDiv);
             block.appendChild(labelDiv);
             block.appendChild(priceDiv);
@@ -688,33 +847,37 @@ header p {
 
     // Spicy level
     var spicyGroup = document.getElementById('spicy-group');
-    if (hasCurryOrFry()) {
-      spicyGroup.style.display = '';
-      var spicyContainer = document.getElementById('spicy-options');
-      spicyContainer.innerHTML = '';
-      var spicyChoices = [
-        { value: 'low',           label: 'Low' },
-        { value: 'medium',        label: 'Medium' },
-        { value: 'high',          label: 'High' },
-        { value: 'no-preference', label: 'No preference' }
-      ];
-      for (var s = 0; s < spicyChoices.length; s++) {
-        (function(choice) {
-          var btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'option-btn';
-          if (spicyLevel === choice.value) btn.className += ' active';
-          btn.textContent = choice.label;
-          btn.addEventListener('click', function() {
-            spicyLevel = (spicyLevel === choice.value) ? null : choice.value;
-            renderAll();
-          });
-          spicyContainer.appendChild(btn);
-        })(spicyChoices[s]);
-      }
+    var spicyHint = document.getElementById('spicy-hint');
+    var spicyContainer = document.getElementById('spicy-options');
+    spicyContainer.innerHTML = '';
+    var spicyChoices = [
+      { value: 'low',           label: 'Low' },
+      { value: 'medium',        label: 'Medium' },
+      { value: 'high',          label: 'High' },
+      { value: 'no-preference', label: 'No preference' }
+    ];
+    var curryOrFry = hasCurryOrFry();
+    if (curryOrFry) {
+      spicyGroup.className = 'question-group';
+      spicyHint.style.display = 'none';
     } else {
-      spicyGroup.style.display = 'none';
+      spicyGroup.className = 'question-group disabled-group';
+      spicyHint.style.display = '';
       spicyLevel = null;
+    }
+    for (var s = 0; s < spicyChoices.length; s++) {
+      (function(choice) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'option-btn';
+        if (spicyLevel === choice.value) btn.className += ' active';
+        btn.textContent = choice.label;
+        btn.addEventListener('click', function() {
+          spicyLevel = (spicyLevel === choice.value) ? null : choice.value;
+          renderAll();
+        });
+        spicyContainer.appendChild(btn);
+      })(spicyChoices[s]);
     }
   }
 
@@ -786,14 +949,24 @@ header p {
       summary.appendChild(totalDiv);
     }
 
-    // Update WhatsApp button
+    // Update WhatsApp button — require both items AND complete customer details
     var waBtn = document.getElementById('wa-btn');
-    if (hasItem) {
+    var customerOk = isCustomerComplete();
+    var validationMsg = document.getElementById('customer-validation-msg');
+
+    if (hasItem && customerOk) {
       waBtn.disabled = false;
       waBtn.className = 'wa-button';
     } else {
       waBtn.disabled = true;
       waBtn.className = 'wa-button disabled';
+    }
+
+    // Show validation hint when there are items but customer details are missing
+    if (hasItem && !customerOk) {
+      validationMsg.style.display = 'block';
+    } else {
+      validationMsg.style.display = 'none';
     }
   }
 
@@ -862,6 +1035,14 @@ header p {
     var url = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg);
     window.open(url, '_blank');
   });
+
+  // Re-validate when customer fields change
+  var custFields = ['cust-name', 'cust-phone', 'cust-postal', 'cust-door'];
+  for (var f = 0; f < custFields.length; f++) {
+    document.getElementById(custFields[f]).addEventListener('input', function() {
+      renderSummary();
+    });
+  }
 
   // Initial render
   renderAll();
