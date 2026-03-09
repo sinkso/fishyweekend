@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fishy Weekend — Order Fresh Fish</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ocean-deep: #dbeeff;
+  --ocean-mid:  #b8d9f8;
+  --gold:       #e67e00;
+  --gold-light: #f59500;
+  --orange:     #c45c00;
+  --white:      #1a3a5c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--ocean-deep);
+  color: var(--white);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+header {
+  background: linear-gradient(135deg, #5b9fd6, #3a7bbf);
+  color: #fff;
+  text-align: center;
+  padding: 24px 16px 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+header h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  margin-bottom: 4px;
+}
+
+header p {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* Section titles */
+.section-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.25rem;
+  margin: 24px 0 12px;
+  color: var(--white);
+}
+
+/* Customer info */
+.customer-section {
+  background: var(--ocean-mid);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 8px;
+}
+
+.customer-section label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  margin-top: 12px;
+}
+
+.customer-section label:first-child {
+  margin-top: 0;
+}
+
+.customer-section input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--white);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.customer-section input:focus {
+  border-color: var(--gold);
+}
+
+.address-row {
+  display: flex;
+  gap: 10px;
+}
+
+.address-row > div {
+  flex: 1;
+}
+
+/* Fish cards */
+.fish-card {
+  background: var(--ocean-mid);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.fish-card.unavailable {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.fish-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+  gap: 10px;
+}
+
+.fish-header:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.fish-header.selected {
+  background: var(--gold);
+  color: #fff;
+}
+
+.fish-emoji {
+  font-size: 1.6rem;
+}
+
+.fish-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  flex: 1;
+}
+
+.fish-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 2px solid rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  background: rgba(255,255,255,0.5);
+  flex-shrink: 0;
+}
+
+.fish-header.selected .fish-check {
+  background: #fff;
+  color: var(--gold);
+  border-color: #fff;
+}
+
+.unavailable-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(0,0,0,0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Prep area */
+.prep-area {
+  display: none;
+  padding: 8px 12px 12px;
+}
+
+.fish-card.open .prep-area {
+  display: block;
+}
+
+.prep-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.prep-block {
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(255,255,255,0.45);
+  border: 2px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+  text-align: center;
+}
+
+.prep-block:hover {
+  background: rgba(255,255,255,0.65);
+}
+
+.prep-block.active {
+  border-color: var(--gold);
+  background: rgba(230, 126, 0, 0.12);
+}
+
+.prep-block.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.prep-icon {
+  font-size: 1.3rem;
+}
+
+.prep-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.prep-price {
+  font-size: 0.72rem;
+  color: var(--gold-light);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Weight buttons inside prep block */
+.weight-buttons {
+  display: none;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.prep-block.active .weight-buttons {
+  display: flex;
+}
+
+.weight-btn {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(255,255,255,0.7);
+  color: var(--white);
+  transition: background 0.15s, color 0.15s;
+}
+
+.weight-btn:hover {
+  background: var(--gold-light);
+  color: #fff;
+}
+
+.weight-btn.chosen {
+  background: var(--gold);
+  color: #fff;
+}
+
+.weight-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: rgba(0,0,0,0.1);
+}
+
+.weight-btn:disabled:hover {
+  background: rgba(0,0,0,0.1);
+  color: var(--white);
+}
+
+/* Other questions */
+.questions-section {
+  background: var(--ocean-mid);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 8px;
+}
+
+.question-group {
+  margin-bottom: 14px;
+}
+
+.question-group:last-child {
+  margin-bottom: 0;
+}
+
+.question-group label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.option-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.option-btn {
+  padding: 8px 16px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(255,255,255,0.5);
+  color: var(--white);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.option-btn:hover {
+  background: rgba(255,255,255,0.7);
+}
+
+.option-btn.active {
+  border-color: var(--gold);
+  background: rgba(230, 126, 0, 0.15);
+}
+
+/* Order summary */
+.summary-section {
+  background: var(--ocean-mid);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.summary-empty {
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.6;
+  padding: 12px 0;
+}
+
+.summary-item {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-fish-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.summary-prep-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-top: 2px;
+  padding-left: 12px;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.15rem;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 2px solid var(--gold);
+}
+
+/* WhatsApp button */
+.wa-button {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.15rem;
+  color: #fff;
+  background: #25d366;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s, opacity 0.2s;
+  box-shadow: 0 3px 10px rgba(37, 211, 102, 0.3);
+}
+
+.wa-button:hover {
+  background: #1eba57;
+}
+
+.wa-button:disabled, .wa-button.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@media (max-width: 400px) {
+  header h1 { font-size: 1.5rem; }
+  .prep-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Fishy Weekend</h1>
+  <p>Fresh fish, delivered to your door every weekend</p>
+</header>
+
+<div class="container">
+
+  <div class="section-title">Your Details</div>
+  <div class="customer-section">
+    <label for="cust-name">Name</label>
+    <input type="text" id="cust-name" placeholder="Your name">
+
+    <label for="cust-phone">Phone Number</label>
+    <input type="tel" id="cust-phone" placeholder="+31 6 1234 5678" value="+31 ">
+
+    <label>Address</label>
+    <div class="address-row">
+      <div>
+        <input type="text" id="cust-postal" placeholder="Postal code (e.g. 1363VS)">
+      </div>
+      <div>
+        <input type="text" id="cust-door" placeholder="Door # (e.g. 88)">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Choose Your Fish</div>
+  <div id="fish-grid"></div>
+
+  <div class="section-title">Other Questions</div>
+  <div class="questions-section">
+    <div class="question-group">
+      <label>Do you need Fish head?</label>
+      <div class="option-buttons" id="fishhead-options"></div>
+    </div>
+    <div class="question-group" id="spicy-group" style="display:none;">
+      <label>What Spicy Level do you need?</label>
+      <div class="option-buttons" id="spicy-options"></div>
+    </div>
+  </div>
+
+  <div class="section-title">Order Summary</div>
+  <div class="summary-section" id="order-summary"></div>
+
+  <button class="wa-button disabled" id="wa-btn" disabled>Send Order via WhatsApp</button>
+</div>
+
+<script>
+(function() {
+
+  /* ── EDITABLE CONFIGURATION ── */
+
+  var FISH = [
+    { id: 'anchovy',  name: 'Anchovy',   emoji: '\uD83D\uDC1F', available: true  },
+    { id: 'dorade',   name: 'Dorade',    emoji: '\uD83D\uDC20', available: true  },
+    { id: 'pomfret',  name: 'Pomfret',   emoji: '\uD83D\uDC1F', available: false },
+    { id: 'prawns',   name: 'Prawns',    emoji: '\uD83E\uDD90', available: true  },
+    { id: 'salmon',   name: 'Salmon',    emoji: '\uD83C\uDF63', available: true  },
+    { id: 'sardine',  name: 'Sardine',   emoji: '\uD83D\uDC20', available: false },
+    { id: 'zeebaars', name: 'Zeebaars',  emoji: '\uD83D\uDC21', available: true  }
+  ];
+
+  var PREPS = [
+    { id: 'uncleaned', label: 'Raw (Uncleaned & Whole Fish)', icon: '\uD83D\uDC1F', minWeight: 1000 },
+    { id: 'cleaned',   label: 'Raw (Cleaned)',                icon: '\u2702\uFE0F',  minWeight: 1000 },
+    { id: 'curry',     label: 'Curry',                        icon: '\uD83C\uDF5B',  minWeight: 500  },
+    { id: 'fry',       label: 'Fry',                          icon: '\uD83C\uDF73',  minWeight: 500  }
+  ];
+
+  var PRICES = {
+    anchovy:  { cleaned: 8.00,  curry: 10.00, fry: 12.00, uncleaned: 6.00  },
+    dorade:   { cleaned: 10.00, curry: 11.50, fry: 14.00, uncleaned: 8.00  },
+    pomfret:  { cleaned: null,  curry: null,  fry: null,  uncleaned: null   },
+    prawns:   { cleaned: 11.00, curry: 12.50, fry: 15.00, uncleaned: 9.00  },
+    salmon:   { cleaned: 10.00, curry: 11.50, fry: 14.00, uncleaned: 8.00  },
+    sardine:  { cleaned: null,  curry: null,  fry: null,  uncleaned: null   },
+    zeebaars: { cleaned: 10.00, curry: 11.50, fry: 14.00, uncleaned: 8.00  }
+  };
+
+  var WEIGHTS = [500, 1000, 1500, 2000];
+
+  var WA_NUMBER = '31645846028';
+
+  /* ── STATE ── */
+
+  var fishSelected = {};
+  var prepActive   = {};
+  var prepWeight   = {};
+  var fishHeadAnswer = null;   // 'yes' or 'no'
+  var spicyLevel     = null;   // 'low', 'medium', 'high', 'no-preference'
+
+  /* ── RENDER ── */
+
+  function renderAll() {
+    renderFishGrid();
+    renderQuestions();
+    renderSummary();
+  }
+
+  function renderFishGrid() {
+    var grid = document.getElementById('fish-grid');
+    grid.innerHTML = '';
+
+    for (var i = 0; i < FISH.length; i++) {
+      (function(fish) {
+        var card = document.createElement('div');
+        card.className = 'fish-card';
+        if (!fish.available) card.className += ' unavailable';
+        if (fishSelected[fish.id]) card.className += ' open';
+
+        // Header
+        var header = document.createElement('div');
+        header.className = 'fish-header';
+        if (fishSelected[fish.id]) header.className += ' selected';
+
+        var emojiSpan = document.createElement('span');
+        emojiSpan.className = 'fish-emoji';
+        emojiSpan.textContent = fish.emoji;
+
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'fish-name';
+        nameSpan.textContent = fish.name;
+
+        var checkSpan = document.createElement('span');
+        checkSpan.className = 'fish-check';
+        checkSpan.textContent = fishSelected[fish.id] ? '\u2713' : '';
+
+        header.appendChild(emojiSpan);
+        header.appendChild(nameSpan);
+
+        if (!fish.available) {
+          var unavailLabel = document.createElement('span');
+          unavailLabel.className = 'unavailable-label';
+          unavailLabel.textContent = 'Unavailable';
+          header.appendChild(unavailLabel);
+        }
+
+        header.appendChild(checkSpan);
+
+        header.addEventListener('click', function() {
+          fishSelected[fish.id] = !fishSelected[fish.id];
+          if (!fishSelected[fish.id]) {
+            // Deselect all preps for this fish
+            for (var p = 0; p < PREPS.length; p++) {
+              var key = fish.id + '_' + PREPS[p].id;
+              prepActive[key] = false;
+              prepWeight[key] = null;
+            }
+          }
+          renderAll();
+        });
+
+        card.appendChild(header);
+
+        // Prep area
+        var prepArea = document.createElement('div');
+        prepArea.className = 'prep-area';
+
+        var prepGrid = document.createElement('div');
+        prepGrid.className = 'prep-grid';
+
+        for (var j = 0; j < PREPS.length; j++) {
+          (function(prep) {
+            var key = fish.id + '_' + prep.id;
+            var price = PRICES[fish.id] ? PRICES[fish.id][prep.id] : null;
+            var isDisabled = price === null || price === undefined;
+
+            var block = document.createElement('div');
+            block.className = 'prep-block';
+            if (isDisabled) block.className += ' disabled';
+            if (prepActive[key]) block.className += ' active';
+
+            var iconDiv = document.createElement('div');
+            iconDiv.className = 'prep-icon';
+            iconDiv.textContent = prep.icon;
+
+            var labelDiv = document.createElement('div');
+            labelDiv.className = 'prep-label';
+            labelDiv.textContent = prep.label;
+
+            var priceDiv = document.createElement('div');
+            priceDiv.className = 'prep-price';
+            priceDiv.textContent = price !== null && price !== undefined ? '\u20AC' + price.toFixed(2) + ' / 500g' : '';
+
+            block.appendChild(iconDiv);
+            block.appendChild(labelDiv);
+            block.appendChild(priceDiv);
+
+            // Weight buttons
+            var wbContainer = document.createElement('div');
+            wbContainer.className = 'weight-buttons';
+
+            for (var k = 0; k < WEIGHTS.length; k++) {
+              (function(w) {
+                var btn = document.createElement('button');
+                btn.className = 'weight-btn';
+                btn.type = 'button';
+                if (prepWeight[key] === w) btn.className += ' chosen';
+                btn.textContent = w >= 1000 ? (w / 1000) + 'kg' : w + 'g';
+
+                if (w < prep.minWeight) {
+                  btn.disabled = true;
+                }
+
+                btn.addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  prepWeight[key] = (prepWeight[key] === w) ? null : w;
+                  renderAll();
+                });
+
+                wbContainer.appendChild(btn);
+              })(WEIGHTS[k]);
+            }
+
+            block.appendChild(wbContainer);
+
+            if (!isDisabled) {
+              block.addEventListener('click', function() {
+                prepActive[key] = !prepActive[key];
+                if (!prepActive[key]) {
+                  prepWeight[key] = null;
+                }
+                renderAll();
+              });
+            }
+
+            prepGrid.appendChild(block);
+          })(PREPS[j]);
+        }
+
+        prepArea.appendChild(prepGrid);
+        card.appendChild(prepArea);
+        grid.appendChild(card);
+      })(FISH[i]);
+    }
+  }
+
+  function hasCurryOrFry() {
+    for (var i = 0; i < FISH.length; i++) {
+      for (var j = 0; j < PREPS.length; j++) {
+        if (PREPS[j].id === 'curry' || PREPS[j].id === 'fry') {
+          var key = FISH[i].id + '_' + PREPS[j].id;
+          if (prepActive[key] && prepWeight[key]) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function renderQuestions() {
+    // Fish head
+    var headContainer = document.getElementById('fishhead-options');
+    headContainer.innerHTML = '';
+    var headChoices = [
+      { value: 'yes', label: 'Yes' },
+      { value: 'no',  label: 'No' }
+    ];
+    for (var h = 0; h < headChoices.length; h++) {
+      (function(choice) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'option-btn';
+        if (fishHeadAnswer === choice.value) btn.className += ' active';
+        btn.textContent = choice.label;
+        btn.addEventListener('click', function() {
+          fishHeadAnswer = (fishHeadAnswer === choice.value) ? null : choice.value;
+          renderAll();
+        });
+        headContainer.appendChild(btn);
+      })(headChoices[h]);
+    }
+
+    // Spicy level
+    var spicyGroup = document.getElementById('spicy-group');
+    if (hasCurryOrFry()) {
+      spicyGroup.style.display = '';
+      var spicyContainer = document.getElementById('spicy-options');
+      spicyContainer.innerHTML = '';
+      var spicyChoices = [
+        { value: 'low',           label: 'Low' },
+        { value: 'medium',        label: 'Medium' },
+        { value: 'high',          label: 'High' },
+        { value: 'no-preference', label: 'No preference' }
+      ];
+      for (var s = 0; s < spicyChoices.length; s++) {
+        (function(choice) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'option-btn';
+          if (spicyLevel === choice.value) btn.className += ' active';
+          btn.textContent = choice.label;
+          btn.addEventListener('click', function() {
+            spicyLevel = (spicyLevel === choice.value) ? null : choice.value;
+            renderAll();
+          });
+          spicyContainer.appendChild(btn);
+        })(spicyChoices[s]);
+      }
+    } else {
+      spicyGroup.style.display = 'none';
+      spicyLevel = null;
+    }
+  }
+
+  function renderSummary() {
+    var summary = document.getElementById('order-summary');
+    summary.innerHTML = '';
+    var grandTotal = 0;
+    var hasItem = false;
+
+    for (var i = 0; i < FISH.length; i++) {
+      var fish = FISH[i];
+      var fishLines = [];
+
+      for (var j = 0; j < PREPS.length; j++) {
+        var prep = PREPS[j];
+        var key = fish.id + '_' + prep.id;
+
+        if (prepActive[key] && prepWeight[key]) {
+          var price = PRICES[fish.id] ? PRICES[fish.id][prep.id] : null;
+          if (price !== null && price !== undefined) {
+            var lineTotal = price * (prepWeight[key] / 500);
+            grandTotal += lineTotal;
+            var weightLabel = prepWeight[key] >= 1000 ? (prepWeight[key] / 1000) + 'kg' : prepWeight[key] + 'g';
+            fishLines.push({ prep: prep.label, weight: weightLabel, total: lineTotal });
+          }
+        }
+      }
+
+      if (fishLines.length > 0) {
+        hasItem = true;
+        var itemDiv = document.createElement('div');
+        itemDiv.className = 'summary-item';
+
+        var nameDiv = document.createElement('div');
+        nameDiv.className = 'summary-fish-name';
+        nameDiv.textContent = fish.emoji + ' ' + fish.name;
+        itemDiv.appendChild(nameDiv);
+
+        for (var l = 0; l < fishLines.length; l++) {
+          var lineDiv = document.createElement('div');
+          lineDiv.className = 'summary-prep-line';
+          var leftSpan = document.createElement('span');
+          leftSpan.textContent = fishLines[l].prep + ' \u2014 ' + fishLines[l].weight;
+          var rightSpan = document.createElement('span');
+          rightSpan.textContent = '\u20AC' + fishLines[l].total.toFixed(2);
+          lineDiv.appendChild(leftSpan);
+          lineDiv.appendChild(rightSpan);
+          itemDiv.appendChild(lineDiv);
+        }
+
+        summary.appendChild(itemDiv);
+      }
+    }
+
+    if (!hasItem) {
+      var emptyDiv = document.createElement('div');
+      emptyDiv.className = 'summary-empty';
+      emptyDiv.textContent = 'Select fish, preparation, and weight to see your order.';
+      summary.appendChild(emptyDiv);
+    } else {
+      var totalDiv = document.createElement('div');
+      totalDiv.className = 'summary-total';
+      var totalLabel = document.createElement('span');
+      totalLabel.textContent = 'Total';
+      var totalValue = document.createElement('span');
+      totalValue.textContent = '\u20AC' + grandTotal.toFixed(2);
+      totalDiv.appendChild(totalLabel);
+      totalDiv.appendChild(totalValue);
+      summary.appendChild(totalDiv);
+    }
+
+    // Update WhatsApp button
+    var waBtn = document.getElementById('wa-btn');
+    if (hasItem) {
+      waBtn.disabled = false;
+      waBtn.className = 'wa-button';
+    } else {
+      waBtn.disabled = true;
+      waBtn.className = 'wa-button disabled';
+    }
+  }
+
+  function buildWhatsAppMessage() {
+    var lines = [];
+    lines.push('*Fishy Weekend Order*');
+    lines.push('');
+
+    var custName  = document.getElementById('cust-name').value.trim();
+    var custPhone = document.getElementById('cust-phone').value.trim();
+    var custPostal = document.getElementById('cust-postal').value.trim();
+    var custDoor   = document.getElementById('cust-door').value.trim();
+
+    if (custName)  lines.push('Name: ' + custName);
+    if (custPhone) lines.push('Phone: ' + custPhone);
+    if (custPostal || custDoor) lines.push('Address: ' + custPostal + (custDoor ? ' #' + custDoor : ''));
+    lines.push('');
+
+    var grandTotal = 0;
+
+    for (var i = 0; i < FISH.length; i++) {
+      var fish = FISH[i];
+      var fishLines = [];
+
+      for (var j = 0; j < PREPS.length; j++) {
+        var prep = PREPS[j];
+        var key = fish.id + '_' + prep.id;
+
+        if (prepActive[key] && prepWeight[key]) {
+          var price = PRICES[fish.id] ? PRICES[fish.id][prep.id] : null;
+          if (price !== null && price !== undefined) {
+            var lineTotal = price * (prepWeight[key] / 500);
+            grandTotal += lineTotal;
+            var weightLabel = prepWeight[key] >= 1000 ? (prepWeight[key] / 1000) + 'kg' : prepWeight[key] + 'g';
+            fishLines.push(prep.label + ' - ' + weightLabel + ' = \u20AC' + lineTotal.toFixed(2));
+          }
+        }
+      }
+
+      if (fishLines.length > 0) {
+        lines.push(fish.emoji + ' *' + fish.name + '*');
+        for (var l = 0; l < fishLines.length; l++) {
+          lines.push('  ' + fishLines[l]);
+        }
+      }
+    }
+
+    lines.push('');
+    lines.push('*Total: \u20AC' + grandTotal.toFixed(2) + '*');
+    lines.push('');
+
+    if (fishHeadAnswer) {
+      lines.push('Fish head: ' + (fishHeadAnswer === 'yes' ? 'Yes' : 'No'));
+    }
+    if (hasCurryOrFry() && spicyLevel) {
+      var spicyMap = { 'low': 'Low', 'medium': 'Medium', 'high': 'High', 'no-preference': 'No preference' };
+      lines.push('Spicy level: ' + (spicyMap[spicyLevel] || spicyLevel));
+    }
+
+    return lines.join('\n');
+  }
+
+  // WhatsApp button click
+  document.getElementById('wa-btn').addEventListener('click', function() {
+    var msg = buildWhatsAppMessage();
+    var url = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
+  });
+
+  // Initial render
+  renderAll();
+
+})();
+</script>
+</body>
+</html>
