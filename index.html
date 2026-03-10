@@ -44,8 +44,8 @@ header {
 }
 
 header img.logo {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid rgba(255,255,255,0.3);
@@ -59,16 +59,48 @@ header img.logo {
 
 header h1 {
   font-family: 'Fredoka One', cursive;
-  font-size: 1.8rem;
+  font-size: 2.8rem;
   margin-bottom: 2px;
   text-shadow: 0 2px 6px rgba(0,0,0,0.3);
   letter-spacing: 0.5px;
+  text-shadow: 2px 3px 0 var(--white);
 }
 
 header p {
   font-size: 0.9rem;
   opacity: 0.85;
   font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.header-tagline {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.header-tagline span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.header-tagline .dot {
+  opacity: 0.5;
+}
+
+.header-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-top: 8px;
   letter-spacing: 0.3px;
 }
 
@@ -439,6 +471,25 @@ header p {
   background: rgba(230, 126, 0, 0.15);
 }
 
+.question-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  background: rgba(255,255,255,0.7);
+  color: var(--white);
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+  transition: border-color 0.2s;
+}
+
+.question-group textarea:focus {
+  border-color: var(--gold);
+}
+
 .question-group.disabled-group {
   opacity: 0.4;
   pointer-events: none;
@@ -542,7 +593,7 @@ header p {
     <img src="fishy_weekend_logo.jpg" alt="Fishy Weekend Logo" class="logo">
     <div class="header-text">
       <h1>Fishy Weekend</h1>
-      <p>Fresh, Cleaned & Cooked Every Saturday!</p>
+      <p><b>Fresh, Cleaned & Cooked - Delivered Every Weekend!</b></p>
     </div>
   </div>
 </header>
@@ -550,8 +601,9 @@ header p {
 <div class="container">
 
   <div class="info-section">
-    <p><strong>Orders / Delivery</strong></p>
-    <p>Place your order <strong>before Thursday 10:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday.</p>
+    <p><b>Orders / Delivery</b></p>
+    <p>Now delivering on <strong>Saturdays & Sundays</strong>!</p>
+    <p>Place your order <strong>before Thursday 10:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday or Sunday.</p>
     <p>At the moment, we deliver <strong>only within Almere</strong>, but we're working on expanding delivery to other regions.</p>
   </div>
 
@@ -563,13 +615,13 @@ header p {
     <label for="cust-phone">Phone Number <span class="required">*</span></label>
     <input type="tel" id="cust-phone" placeholder="+31 6 1234 5678" value="+31 ">
 
-    <label>Address <span class="required">*</span></label>
+    <label>Delivery Address <span class="required">*</span></label>
     <div class="address-row">
       <div>
-        <input type="text" id="cust-postal" placeholder="Postal code (e.g. 1363VS)">
+        <input type="text" id="cust-postal" placeholder="Postal code (e.g. 1316 AB)">
       </div>
       <div>
-        <input type="text" id="cust-door" placeholder="Door # (e.g. 88)">
+        <input type="text" id="cust-door" placeholder="Door # (e.g. 12)">
       </div>
     </div>
     <div class="validation-msg" id="customer-validation-msg">Please fill in all your details above to place an order.</div>
@@ -586,13 +638,27 @@ header p {
       <div class="option-buttons" id="fishhead-options"></div>
     </div>
     <div class="question-group disabled-group" id="spicy-group">
-      <label>What Spicy Level do you need?</label>
+      <label>What Spicy Level do you need for curry/fry?</label>
       <div class="option-buttons" id="spicy-options"></div>
       <div class="disabled-hint" id="spicy-hint">Select a Curry or Fry preparation to choose spicy level</div>
+    </div>
+    <div class="question-group">
+      <label>Preferred delivery day</label>
+      <div class="option-buttons" id="delivery-day-options"></div>
+    </div>
+    <div class="question-group">
+      <label>Preferred delivery time</label>
+      <div class="option-buttons" id="delivery-time-options"></div>
+      <div class="disabled-hint" id="delivery-time-hint" style="display:none;"></div>
+    </div>
+    <div class="question-group">
+      <label>Special instructions or allergy information</label>
+      <textarea id="special-instructions" placeholder="Please provide any special instructions or allergy information"></textarea>
     </div>
   </div>
 
   <div class="section-title">Order Summary</div>
+  <div class="section-subtext">Enjoy a relaxing weekend with fresh & quality fish.</div>
   <div class="summary-section" id="order-summary"></div>
 
   <button class="wa-button disabled" id="wa-btn" disabled>Send Order via WhatsApp</button>
@@ -634,6 +700,10 @@ header p {
 
   var WA_NUMBER = '31645846028';
 
+  // Google Apps Script Web App URL — replace with your deployed URL
+  var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPP59g1x7uEzdesIUJa5jYz9DPgRMw2N0FTRstU1_hD190jvkBBQFsR6x-BAjtf3Bz/exec';  // e.g. 'https://script.google.com/macros/s/AKfycbx.../exec'
+
+
   /* ── STATE ── */
 
   var fishSelected = {};
@@ -641,6 +711,8 @@ header p {
   var prepWeight   = {};
   var fishHeadAnswer = null;   // 'yes' or 'no'
   var spicyLevel     = null;   // 'low', 'medium', 'high', 'no-preference'
+  var deliveryDay    = null;   // 'saturday' or 'sunday'
+  var deliveryTime   = null;   // 'before-12', '13-14', 'after-14'
 
   /* ── VALIDATION ── */
 
@@ -822,6 +894,18 @@ header p {
     return false;
   }
 
+  function hasRawFish() {
+    for (var i = 0; i < FISH.length; i++) {
+      for (var j = 0; j < PREPS.length; j++) {
+        if (PREPS[j].id === 'cleaned' || PREPS[j].id === 'uncleaned') {
+          var key = FISH[i].id + '_' + PREPS[j].id;
+          if (prepActive[key] && prepWeight[key]) return true;
+        }
+      }
+    }
+    return false;
+  }
+
   function renderQuestions() {
     // Fish head
     var headContainer = document.getElementById('fishhead-options');
@@ -878,6 +962,68 @@ header p {
         });
         spicyContainer.appendChild(btn);
       })(spicyChoices[s]);
+    }
+
+    // Delivery day
+    var dayContainer = document.getElementById('delivery-day-options');
+    dayContainer.innerHTML = '';
+    var dayChoices = [
+      { value: 'saturday', label: 'Saturday' },
+      { value: 'sunday',   label: 'Sunday' }
+    ];
+    for (var d = 0; d < dayChoices.length; d++) {
+      (function(choice) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'option-btn';
+        if (deliveryDay === choice.value) btn.className += ' active';
+        btn.textContent = choice.label;
+        btn.addEventListener('click', function() {
+          deliveryDay = (deliveryDay === choice.value) ? null : choice.value;
+          renderAll();
+        });
+        dayContainer.appendChild(btn);
+      })(dayChoices[d]);
+    }
+
+    // Delivery time
+    var timeContainer = document.getElementById('delivery-time-options');
+    var timeHint = document.getElementById('delivery-time-hint');
+    timeContainer.innerHTML = '';
+    var hasRaw = hasRawFish();
+    var timeChoices = [
+      { value: 'before-12', label: 'Before 12:00', rawOnly: true },
+      { value: '13-14',     label: 'Between 13:00 and 14:00', rawOnly: false },
+      { value: 'after-14',  label: 'After 14:00', rawOnly: false }
+    ];
+    for (var t = 0; t < timeChoices.length; t++) {
+      (function(choice) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'option-btn';
+        if (deliveryTime === choice.value) btn.className += ' active';
+        if (choice.rawOnly && !hasRaw) {
+          btn.disabled = true;
+          btn.style.opacity = '0.4';
+          btn.style.cursor = 'not-allowed';
+          if (deliveryTime === choice.value) {
+            deliveryTime = null;
+          }
+        }
+        btn.textContent = choice.label;
+        btn.addEventListener('click', function() {
+          if (btn.disabled) return;
+          deliveryTime = (deliveryTime === choice.value) ? null : choice.value;
+          renderAll();
+        });
+        timeContainer.appendChild(btn);
+      })(timeChoices[t]);
+    }
+    if (!hasRaw) {
+      timeHint.textContent = '"Before 12:00" is available only for raw fish (Cleaned & Uncleaned)';
+      timeHint.style.display = '';
+    } else {
+      timeHint.style.display = 'none';
     }
   }
 
@@ -1007,7 +1153,7 @@ header p {
       }
 
       if (fishLines.length > 0) {
-        lines.push(fish.emoji + ' *' + fish.name + '*');
+        lines.push('*' + fish.name + '*');
         for (var l = 0; l < fishLines.length; l++) {
           lines.push('  ' + fishLines[l]);
         }
@@ -1026,11 +1172,86 @@ header p {
       lines.push('Spicy level: ' + (spicyMap[spicyLevel] || spicyLevel));
     }
 
+    if (deliveryDay) {
+      var dayMap = { 'saturday': 'Saturday', 'sunday': 'Sunday' };
+      lines.push('Delivery day: ' + (dayMap[deliveryDay] || deliveryDay));
+    }
+    if (deliveryTime) {
+      var timeMap = { 'before-12': 'Before 12:00', '13-14': 'Between 13:00 and 14:00', 'after-14': 'After 14:00' };
+      lines.push('Delivery time: ' + (timeMap[deliveryTime] || deliveryTime));
+    }
+
+    var specialInstructions = document.getElementById('special-instructions').value.trim();
+    if (specialInstructions) {
+      lines.push('');
+      lines.push('Special allergen instructions: ' + specialInstructions);
+    }
+
     return lines.join('\n');
+  }
+
+  function buildOrderData() {
+    var c = getCustomerDetails();
+    var spicyMap = { 'low': 'Low', 'medium': 'Medium', 'high': 'High', 'no-preference': 'No preference' };
+    var dayMap = { 'saturday': 'Saturday', 'sunday': 'Sunday' };
+    var timeMap = { 'before-12': 'Before 12:00', '13-14': 'Between 13:00 and 14:00', 'after-14': 'After 14:00' };
+
+    // Build order items string
+    var orderLines = [];
+    var grandTotal = 0;
+    for (var i = 0; i < FISH.length; i++) {
+      var fish = FISH[i];
+      for (var j = 0; j < PREPS.length; j++) {
+        var prep = PREPS[j];
+        var key = fish.id + '_' + prep.id;
+        if (prepActive[key] && prepWeight[key]) {
+          var price = PRICES[fish.id] ? PRICES[fish.id][prep.id] : null;
+          if (price !== null && price !== undefined) {
+            var lineTotal = price * (prepWeight[key] / 500);
+            grandTotal += lineTotal;
+            var wLabel = prepWeight[key] >= 1000 ? (prepWeight[key] / 1000) + 'kg' : prepWeight[key] + 'g';
+            orderLines.push(fish.name + ' - ' + prep.label + ' - ' + wLabel + ' = EUR ' + lineTotal.toFixed(2));
+          }
+        }
+      }
+    }
+
+    return {
+      name: c.name,
+      phone: c.phone,
+      postal: c.postal,
+      door: c.door,
+      orderItems: orderLines.join('\n'),
+      grandTotal: 'EUR ' + grandTotal.toFixed(2),
+      fishHead: fishHeadAnswer ? (fishHeadAnswer === 'yes' ? 'Yes' : 'No') : '',
+      spicyLevel: spicyLevel ? (spicyMap[spicyLevel] || spicyLevel) : '',
+      deliveryDay: deliveryDay ? (dayMap[deliveryDay] || deliveryDay) : '',
+      deliveryTime: deliveryTime ? (timeMap[deliveryTime] || deliveryTime) : '',
+      specialInstructions: document.getElementById('special-instructions').value.trim()
+    };
+  }
+
+  function submitToGoogleSheets() {
+    if (!GOOGLE_SCRIPT_URL) return;
+    var data = buildOrderData();
+    try {
+      // Use form-encoded POST which Apps Script accepts without CORS issues
+      var formData = new FormData();
+      formData.append('payload', JSON.stringify(data));
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        body: formData
+      }).catch(function() {
+        // Silently fail — WhatsApp is the primary channel
+      });
+    } catch (err) {
+      // Silently fail
+    }
   }
 
   // WhatsApp button click
   document.getElementById('wa-btn').addEventListener('click', function() {
+    submitToGoogleSheets();
     var msg = buildWhatsAppMessage();
     var url = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg);
     window.open(url, '_blank');
