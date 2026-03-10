@@ -45,7 +45,7 @@ function doPost(e) {
     sheet.appendRow([
       new Date().toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }),
       data.name || '',
-      data.phone || '',
+      data.phone ? "'" + data.phone : '',
       data.postal || '',
       data.door || '',
       data.orderItems || '',
