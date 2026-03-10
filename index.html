@@ -655,6 +655,7 @@ header p {
       <label>Special instructions or allergy information</label>
       <textarea id="special-instructions" placeholder="Please provide any special instructions or allergy information"></textarea>
     </div>
+    <div class="validation-msg" id="details-validation-msg"></div>
   </div>
 
   <div class="section-title">Order Summary</div>
@@ -729,6 +730,23 @@ header p {
     var c = getCustomerDetails();
     // Phone must be more than just the "+31 " prefix
     return c.name.length > 0 && c.phone.length > 4 && c.postal.length > 0 && c.door.length > 0;
+  }
+
+  function isAdditionalDetailsComplete() {
+    if (!fishHeadAnswer) return false;
+    if (!deliveryDay) return false;
+    if (!deliveryTime) return false;
+    if (hasCurryOrFry() && !spicyLevel) return false;
+    return true;
+  }
+
+  function getMissingDetails() {
+    var missing = [];
+    if (!fishHeadAnswer) missing.push('Fish head preference');
+    if (hasCurryOrFry() && !spicyLevel) missing.push('Spicy level');
+    if (!deliveryDay) missing.push('Delivery day');
+    if (!deliveryTime) missing.push('Delivery time');
+    return missing;
   }
 
   /* ── RENDER ── */
@@ -1095,12 +1113,14 @@ header p {
       summary.appendChild(totalDiv);
     }
 
-    // Update WhatsApp button — require both items AND complete customer details
+    // Update WhatsApp button — require items, customer details, AND additional details
     var waBtn = document.getElementById('wa-btn');
     var customerOk = isCustomerComplete();
+    var detailsOk = isAdditionalDetailsComplete();
     var validationMsg = document.getElementById('customer-validation-msg');
+    var detailsMsg = document.getElementById('details-validation-msg');
 
-    if (hasItem && customerOk) {
+    if (hasItem && customerOk && detailsOk) {
       waBtn.disabled = false;
       waBtn.className = 'wa-button';
     } else {
@@ -1113,6 +1133,15 @@ header p {
       validationMsg.style.display = 'block';
     } else {
       validationMsg.style.display = 'none';
+    }
+
+    // Show validation hint when there are items but additional details are missing
+    if (hasItem && customerOk && !detailsOk) {
+      var missing = getMissingDetails();
+      detailsMsg.textContent = 'Please select: ' + missing.join(', ');
+      detailsMsg.style.display = 'block';
+    } else {
+      detailsMsg.style.display = 'none';
     }
   }
 
