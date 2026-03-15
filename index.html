@@ -603,7 +603,7 @@ header p {
   <div class="info-section">
     <p><b>Orders / Delivery</b></p>
     <p>Now delivering on <strong>Saturdays & Sundays</strong>!</p>
-    <p>Place your order <strong>before Thursday 10:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday or Sunday.</p>
+    <p>Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday or Sunday.</p>
     <p>At the moment, we deliver <strong>only within Almere</strong>, but we're working on expanding delivery to other regions.</p>
   </div>
 
@@ -662,13 +662,13 @@ header p {
   <div class="section-subtext">Enjoy a relaxing weekend with fresh & quality fish.</div>
   <div class="summary-section" id="order-summary"></div>
 
-  <button class="wa-button disabled" id="wa-btn" disabled>Send Order via WhatsApp</button>
+  <button class="wa-button disabled" id="wa-btn" disabled>Submit Order & Confirm via WhatsApp</button>
 </div>
 
 <script>
 (function() {
 
-  /* ── EDITABLE CONFIGURATION ── */
+  /* ── EDITABLE CONFIGURATION (defaults — overridden by Google Sheet) ── */
 
   // Set to false to show a "closed" message and disable ordering
   var SITE_OPEN = true;
@@ -706,6 +706,178 @@ header p {
 
   // Google Apps Script Web App URL — replace with your deployed URL
   var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPGueJkS2jQdVtaPW89sWhYRPoGM5qIktFeNDcFms0vCuIiaW_jhOAhRoWWN634peh/exec';  // e.g. 'https://script.google.com/macros/s/AKfycbx.../exec'
+
+  // ── Google Sheet CSV URLs ──
+  // Share your sheet as "Anyone with the link" (Viewer)
+  // The sheet needs two tabs: "Config" (key/value pairs) and "Fish" (fish + prices)
+  var SPREADSHEET_ID = '1zL1pgTzVr_kfhqzVKvuSVG3tmY2eOJbvAVrHaDoq9Ys';
+  var CONFIG_CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Config';
+  var FISH_CSV_URL   = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Fish';
+
+  /* ── CSV PARSER & CONFIG LOADER ── */
+
+  function parseCSV(text) {
+    var lines = text.split('\n');
+    if (lines.length < 2) return [];
+    // Parse header (handles quoted values)
+    var headers = parseCSVRow(lines[0]);
+    var rows = [];
+    for (var i = 1; i < lines.length; i++) {
+      if (lines[i].trim() === '') continue;
+      var values = parseCSVRow(lines[i]);
+      var row = {};
+      for (var j = 0; j < headers.length; j++) {
+        row[headers[j].toLowerCase().trim()] = (values[j] || '').trim();
+      }
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  function parseCSVRow(line) {
+    var result = [];
+    var current = '';
+    var inQuotes = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (inQuotes) {
+        if (ch === '"' && i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else if (ch === '"') {
+          inQuotes = false;
+        } else {
+          current += ch;
+        }
+      } else {
+        if (ch === '"') {
+          inQuotes = true;
+        } else if (ch === ',') {
+          result.push(current);
+          current = '';
+        } else {
+          current += ch;
+        }
+      }
+    }
+    result.push(current);
+    return result;
+  }
+
+  function applyConfigFromSheet(configRows, fishRows) {
+    // Apply Config tab (key-value pairs)
+    for (var i = 0; i < configRows.length; i++) {
+      var key = (configRows[i].key || '').toUpperCase();
+      var val = configRows[i].value || '';
+      if (key === 'SITE_OPEN') {
+        SITE_OPEN = val.toUpperCase() === 'TRUE';
+      }
+    }
+
+    // Apply Fish tab (fish list + prices)
+    if (fishRows.length > 0) {
+      var newFish = [];
+      var newPrices = {};
+      var emojiMap = {};
+      for (var e = 0; e < FISH.length; e++) {
+        emojiMap[FISH[e].id] = FISH[e].emoji;
+      }
+
+      for (var f = 0; f < fishRows.length; f++) {
+        var r = fishRows[f];
+        var fishId = (r.id || '').toLowerCase().trim();
+        if (!fishId) continue;
+
+        newFish.push({
+          id: fishId,
+          name: r.name || fishId,
+          emoji: r.emoji || emojiMap[fishId] || '\uD83D\uDC1F',
+          available: (r.available || '').toUpperCase() === 'TRUE'
+        });
+
+        var priceObj = {};
+        var prepIds = ['cleaned', 'curry', 'fry', 'uncleaned'];
+        for (var p = 0; p < prepIds.length; p++) {
+          var priceVal = r[prepIds[p]];
+          if (priceVal !== undefined && priceVal !== '' && !isNaN(parseFloat(priceVal))) {
+            priceObj[prepIds[p]] = parseFloat(priceVal);
+          } else {
+            priceObj[prepIds[p]] = null;
+          }
+        }
+        newPrices[fishId] = priceObj;
+      }
+
+      FISH = newFish;
+      PRICES = newPrices;
+    }
+  }
+
+  var configSource = 'defaults';
+
+  function showConfigSource() {
+    var badge = document.createElement('div');
+    badge.style.cssText = 'position:fixed;bottom:6px;right:6px;width:6px;height:6px;border-radius:50%;pointer-events:none;opacity:0.5;';
+    badge.style.background = configSource === 'sheet' ? '#4caf50' : '#e67e00';
+    document.body.appendChild(badge);
+  }
+
+  function loadConfigFromSheet() {
+    if (!SPREADSHEET_ID || SPREADSHEET_ID === 'PASTE_YOUR_SPREADSHEET_ID_HERE') {
+      configSource = 'defaults';
+      initApp();
+      return;
+    }
+
+    document.querySelector('.container').style.opacity = '0.4';
+
+    var configDone = false, fishDone = false;
+    var configRows = [], fishRows = [];
+    var sheetLoaded = false;
+
+    function checkDone() {
+      if (configDone && fishDone) {
+        if (sheetLoaded) {
+          applyConfigFromSheet(configRows, fishRows);
+          configSource = 'sheet';
+        } else {
+          configSource = 'defaults';
+        }
+        document.querySelector('.container').style.opacity = '1';
+        initApp();
+      }
+    }
+
+    fetch(CONFIG_CSV_URL).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function(text) {
+      if (text.trim().charAt(0) !== '<') {
+        configRows = parseCSV(text);
+        sheetLoaded = true;
+      }
+    }).catch(function(err) {
+      console.warn('Config fetch failed:', err);
+    }).finally(function() {
+      configDone = true;
+      checkDone();
+    });
+
+    fetch(FISH_CSV_URL).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function(text) {
+      if (text.trim().charAt(0) !== '<') {
+        fishRows = parseCSV(text);
+        sheetLoaded = true;
+      }
+    }).catch(function(err) {
+      console.warn('Fish fetch failed:', err);
+    }).finally(function() {
+      fishDone = true;
+      checkDone();
+    });
+  }
 
 
   /* ── STATE ── */
@@ -1297,22 +1469,27 @@ header p {
     });
   }
 
-  // If site is closed, show overlay and block ordering
-  if (!SITE_OPEN) {
-    var overlay = document.createElement('div');
-    overlay.id = 'site-closed-overlay';
-    overlay.innerHTML =
-      '<div style="background:#fff;border-radius:16px;padding:40px 30px;max-width:420px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.15);">' +
-        '<div style="font-size:3rem;margin-bottom:12px;">🐟</div>' +
-        '<h2 style="font-family:Fredoka One,cursive;color:#1a3a5c;margin:0 0 12px;">We\'ll Be Back!</h2>' +
-        '<p style="font-family:Nunito,sans-serif;color:#3a5a7c;font-size:1rem;line-height:1.5;margin:0;">Fishy Weekend is currently busy preparing orders for this week. Please check back later for next weekend!</p>' +
-      '</div>';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
-    document.body.appendChild(overlay);
+  function initApp() {
+    // If site is closed, show overlay and block ordering
+    if (!SITE_OPEN) {
+      var overlay = document.createElement('div');
+      overlay.id = 'site-closed-overlay';
+      overlay.innerHTML =
+        '<div style="background:#fff;border-radius:16px;padding:40px 30px;max-width:420px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.15);">' +
+          '<div style="font-size:3rem;margin-bottom:12px;">🐟</div>' +
+          '<h2 style="font-family:Fredoka One,cursive;color:#1a3a5c;margin:0 0 12px;">We\'ll Be Back!</h2>' +
+          '<p style="font-family:Nunito,sans-serif;color:#3a5a7c;font-size:1rem;line-height:1.5;margin:0;">Fishy Weekend is currently busy preparing orders for this week. Please check back later for next weekend!</p>' +
+        '</div>';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+      document.body.appendChild(overlay);
+    }
+
+    renderAll();
+    showConfigSource();
   }
 
-  // Initial render
-  renderAll();
+  // Load config from Google Sheet, then initialize
+  loadConfigFromSheet();
 
 })();
 </script>
