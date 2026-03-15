@@ -670,6 +670,9 @@ header p {
 
   /* ── EDITABLE CONFIGURATION ── */
 
+  // Set to false to show a "closed" message and disable ordering
+  var SITE_OPEN = true;
+
   var FISH = [
     { id: 'anchovy',  name: 'Anchovy',   emoji: '\uD83D\uDC1F', available: true  },
     { id: 'dorade',   name: 'Dorade',    emoji: '\uD83D\uDC20', available: true  },
@@ -1292,6 +1295,20 @@ header p {
     document.getElementById(custFields[f]).addEventListener('input', function() {
       renderSummary();
     });
+  }
+
+  // If site is closed, show overlay and block ordering
+  if (!SITE_OPEN) {
+    var overlay = document.createElement('div');
+    overlay.id = 'site-closed-overlay';
+    overlay.innerHTML =
+      '<div style="background:#fff;border-radius:16px;padding:40px 30px;max-width:420px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.15);">' +
+        '<div style="font-size:3rem;margin-bottom:12px;">🐟</div>' +
+        '<h2 style="font-family:Fredoka One,cursive;color:#1a3a5c;margin:0 0 12px;">We\'ll Be Back!</h2>' +
+        '<p style="font-family:Nunito,sans-serif;color:#3a5a7c;font-size:1rem;line-height:1.5;margin:0;">Fishy Weekend is currently busy preparing orders for this week. Please check back later for next weekend!</p>' +
+      '</div>';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+    document.body.appendChild(overlay);
   }
 
   // Initial render
