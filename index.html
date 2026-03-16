@@ -30,8 +30,7 @@ header {
   color: #fff;
   padding: 20px 16px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 100;
 }
 
@@ -578,10 +577,18 @@ header p {
   pointer-events: none;
 }
 
+@media (max-width: 600px) {
+  header h1 { font-size: 2.0rem; }
+  header img.logo { width: 56px; height: 56px; }
+  header { padding: 14px 12px; }
+  .header-inner { gap: 10px; }
+  header p { font-size: 0.8rem; }
+  .header-tagline span { font-size: 0.6rem; }
+}
 @media (max-width: 400px) {
-  header h1 { font-size: 1.4rem; }
-  header img.logo { width: 64px; height: 64px; }
-  .header-inner { gap: 12px; }
+  header h1 { font-size: 1.8rem; }
+  header img.logo { width: 48px; height: 48px; }
+  .header-inner { gap: 8px; }
   .prep-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>
@@ -1466,10 +1473,26 @@ header p {
     window.open(url, '_blank');
   });
 
-  // Re-validate when customer fields change
+  // Save & restore customer details via localStorage
   var custFields = ['cust-name', 'cust-phone', 'cust-postal', 'cust-door'];
+  try {
+    var saved = JSON.parse(localStorage.getItem('fishy_customer') || '{}');
+    for (var s = 0; s < custFields.length; s++) {
+      if (saved[custFields[s]]) {
+        document.getElementById(custFields[s]).value = saved[custFields[s]];
+      }
+    }
+  } catch (e) {}
+
   for (var f = 0; f < custFields.length; f++) {
     document.getElementById(custFields[f]).addEventListener('input', function() {
+      try {
+        var obj = {};
+        for (var k = 0; k < custFields.length; k++) {
+          obj[custFields[k]] = document.getElementById(custFields[k]).value;
+        }
+        localStorage.setItem('fishy_customer', JSON.stringify(obj));
+      } catch (e) {}
       renderSummary();
     });
   }
