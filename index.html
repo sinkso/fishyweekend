@@ -675,44 +675,24 @@ header p {
 <script>
 (function() {
 
-  /* ── EDITABLE CONFIGURATION (defaults — overridden by Google Sheet) ── */
+  /* ── CONFIGURATION — loaded from Google Sheet ── */
 
-  // Set to false to show a "closed" message and disable ordering
   var SITE_OPEN = true;
-
-  var FISH = [
-    { id: 'anchovy',  name: 'Anchovy',   emoji: '\uD83D\uDC1F', available: true  },
-    { id: 'dorade',   name: 'Dorade',    emoji: '\uD83D\uDC20', available: true  },
-    { id: 'pomfret',  name: 'Pomfret',   emoji: '\uD83D\uDC1F', available: false },
-    { id: 'prawns',   name: 'Prawns',    emoji: '\uD83E\uDD90', available: true  },
-    { id: 'salmon',   name: 'Salmon',    emoji: '\uD83C\uDF63', available: true  },
-    { id: 'sardine',  name: 'Sardine',   emoji: '\uD83D\uDC20', available: false },
-    { id: 'zeebaars', name: 'Zeebaars',  emoji: '\uD83D\uDC21', available: true  }
-  ];
-
+  var FISH = [];
   var PREPS = [
     { id: 'uncleaned', label: 'Raw (Uncleaned & Whole Fish)', icon: '\uD83D\uDC1F', minWeight: 1000 },
     { id: 'cleaned',   label: 'Raw (Cleaned)',                icon: '\u2702\uFE0F',  minWeight: 1000 },
     { id: 'curry',     label: 'Curry',                        icon: '\uD83C\uDF5B',  minWeight: 500  },
     { id: 'fry',       label: 'Fry',                          icon: '\uD83C\uDF73',  minWeight: 500  }
   ];
-
-  var PRICES = {
-    anchovy:  { cleaned: 8.00,  curry: 10.00, fry: 12.00, uncleaned: 6.00  },
-    dorade:   { cleaned: 10.00, curry: 11.50, fry: 14.00, uncleaned: 8.00  },
-    pomfret:  { cleaned: null,  curry: null,  fry: null,  uncleaned: null   },
-    prawns:   { cleaned: 11.00, curry: 12.50, fry: 15.00, uncleaned: 9.00  },
-    salmon:   { cleaned: 10.00, curry: 11.50, fry: 14.00, uncleaned: 8.00  },
-    sardine:  { cleaned: null,  curry: null,  fry: null,  uncleaned: null   },
-    zeebaars: { cleaned: 10.00, curry: 11.50, fry: 14.00, uncleaned: 8.00  }
-  };
-
+  var PRICES = {};
   var WEIGHTS = [500, 1000, 1500, 2000];
 
   var WA_NUMBER = '31612088019'; // kishore
 
   // Google Apps Script Web App URL — replace with your deployed URL
   var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPGueJkS2jQdVtaPW89sWhYRPoGM5qIktFeNDcFms0vCuIiaW_jhOAhRoWWN634peh/exec';  // e.g. 'https://script.google.com/macros/s/AKfycbx.../exec'
+  // var GOOGLE_SCRIPT_URL = ''; // leave empty to disable server-side order saving (WhatsApp confirmation will still work)'
 
   // ── Google Sheet CSV URLs ──
   // Share your sheet as "Anyone with the link" (Viewer)
@@ -785,21 +765,20 @@ header p {
     if (fishRows.length > 0) {
       var newFish = [];
       var newPrices = {};
-      var emojiMap = {};
-      for (var e = 0; e < FISH.length; e++) {
-        emojiMap[FISH[e].id] = FISH[e].emoji;
-      }
-
       for (var f = 0; f < fishRows.length; f++) {
         var r = fishRows[f];
         var fishId = (r.id || '').toLowerCase().trim();
         if (!fishId) continue;
 
+        var wNoHead = parseFloat(r.wastage_without_head_percentage);
+        var wHead   = parseFloat(r.wastage_with_head_percentage);
         newFish.push({
           id: fishId,
           name: r.name || fishId,
-          emoji: r.emoji || emojiMap[fishId] || '\uD83D\uDC1F',
-          available: (r.available || '').toUpperCase() === 'TRUE'
+          emoji: r.emoji || '\uD83D\uDC1F',
+          available: (r.available || '').toUpperCase() === 'TRUE',
+          wastage_without_head_percentage: isNaN(wNoHead) ? 0 : wNoHead,
+          wastage_with_head_percentage:    isNaN(wHead)   ? 0 : wHead
         });
 
         var priceObj = {};
@@ -1337,9 +1316,12 @@ header p {
     var custPostal = document.getElementById('cust-postal').value.trim();
     var custDoor   = document.getElementById('cust-door').value.trim();
 
-    if (custName)  lines.push('Name: ' + custName);
-    if (custPhone) lines.push('Phone: ' + custPhone);
-    if (custPostal || custDoor) lines.push('Address: ' + custPostal + (custDoor ? ' #' + custDoor : ''));
+    if (custName)  lines.push('Dear ' + custName + ', thank you for your order!');
+    lines.push('Please find your order summary below. We will process your order and deliver it on the committed date and time.');
+    // if (custPhone) lines.push('Phone: ' + custPhone);
+    // if (custPostal || custDoor) lines.push('Address: ' + custPostal + (custDoor ? ' #' + custDoor : ''));
+    lines.push('');
+    lines.push('*Order details*');
     lines.push('');
 
     var grandTotal = 0;
@@ -1358,23 +1340,32 @@ header p {
             var lineTotal = price * (prepWeight[key] / 500);
             grandTotal += lineTotal;
             var weightLabel = prepWeight[key] >= 1000 ? (prepWeight[key] / 1000) + 'kg' : prepWeight[key] + 'g';
-            fishLines.push(prep.label + ' - ' + weightLabel + ' = \u20AC' + lineTotal.toFixed(2));
+            var lineStr = prep.label + ' - ' + weightLabel + ' = \u20AC' + lineTotal.toFixed(2);
+            // Add net weight after wastage
+            var wastePct = fishHeadAnswer === 'yes' ? (fish.wastage_with_head_percentage || 0) : (fish.wastage_without_head_percentage || 0);
+            if (wastePct > 0) {
+              var netGrams = Math.round(prepWeight[key] * (1 - wastePct / 100));
+              var netLabel = netGrams >= 1000 ? (netGrams / 1000).toFixed(1) + 'kg' : netGrams + 'g';
+              lineStr += ' (net ~' + netLabel + ')';
+            }
+            fishLines.push(lineStr);
           }
         }
       }
 
       if (fishLines.length > 0) {
+        var wastePct = fishHeadAnswer === 'yes' ? (fish.wastage_with_head_percentage || 0) : (fish.wastage_without_head_percentage || 0);
         lines.push('*' + fish.name + '*');
         for (var l = 0; l < fishLines.length; l++) {
           lines.push('  ' + fishLines[l]);
+        }
+        if (wastePct > 0) {
+          lines.push('   _Wastage: ' + wastePct + '%_');
         }
       }
     }
 
     lines.push('');
-    lines.push('*Total: \u20AC' + grandTotal.toFixed(2) + '*');
-    lines.push('');
-
     if (fishHeadAnswer) {
       lines.push('Fish head: ' + (fishHeadAnswer === 'yes' ? 'Yes' : 'No'));
     }
@@ -1397,6 +1388,10 @@ header p {
       lines.push('');
       lines.push('Special allergen instructions: ' + specialInstructions);
     }
+
+    lines.push('_*Note: The approximate wastage percentage per product and the expected net weight are as shown above._');
+    lines.push('');
+    lines.push('*Total: \u20AC' + grandTotal.toFixed(2) + '*');
 
     lines.push('');
     lines.push('*Payment Details:*');
