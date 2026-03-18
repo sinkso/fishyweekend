@@ -1325,6 +1325,7 @@ header p {
     lines.push('');
 
     var grandTotal = 0;
+    var maxWastePct = 0;
 
     for (var i = 0; i < FISH.length; i++) {
       var fish = FISH[i];
@@ -1341,12 +1342,15 @@ header p {
             grandTotal += lineTotal;
             var weightLabel = prepWeight[key] >= 1000 ? (prepWeight[key] / 1000) + 'kg' : prepWeight[key] + 'g';
             var lineStr = prep.label + ' - ' + weightLabel + ' = \u20AC' + lineTotal.toFixed(2);
-            // Add net weight after wastage
-            var wastePct = fishHeadAnswer === 'yes' ? (fish.wastage_with_head_percentage || 0) : (fish.wastage_without_head_percentage || 0);
-            if (wastePct > 0) {
-              var netGrams = Math.round(prepWeight[key] * (1 - wastePct / 100));
-              var netLabel = netGrams >= 1000 ? (netGrams / 1000).toFixed(1) + 'kg' : netGrams + 'g';
-              lineStr += ' (net ~' + netLabel + ')';
+            // Add net weight for non-uncleaned preps
+            if (prep.id !== 'uncleaned') {
+              var wastePct = fishHeadAnswer === 'yes' ? (fish.wastage_with_head_percentage || 0) : (fish.wastage_without_head_percentage || 0);
+              if (wastePct > 0) {
+                if (wastePct > maxWastePct) maxWastePct = wastePct;
+                var netGrams = Math.round(prepWeight[key] * (1 - wastePct / 100));
+                var netLabel = netGrams >= 1000 ? (netGrams / 1000).toFixed(1) + 'kg' : netGrams + 'g';
+                lineStr += ' (net ~' + netLabel + ')';
+              }
             }
             fishLines.push(lineStr);
           }
@@ -1354,13 +1358,9 @@ header p {
       }
 
       if (fishLines.length > 0) {
-        var wastePct = fishHeadAnswer === 'yes' ? (fish.wastage_with_head_percentage || 0) : (fish.wastage_without_head_percentage || 0);
         lines.push('*' + fish.name + '*');
         for (var l = 0; l < fishLines.length; l++) {
           lines.push('  ' + fishLines[l]);
-        }
-        if (wastePct > 0) {
-          lines.push('   _Wastage: ' + wastePct + '%_');
         }
       }
     }
@@ -1385,11 +1385,14 @@ header p {
 
     var specialInstructions = document.getElementById('special-instructions').value.trim();
     if (specialInstructions) {
-      lines.push('');
       lines.push('Special allergen instructions: ' + specialInstructions);
     }
 
-    lines.push('_*Note: The approximate wastage percentage per product and the expected net weight are as shown above._');
+    if (maxWastePct > 0) {
+      lines.push('');
+      lines.push('_Note: Approximate wastage of the product is ' + maxWastePct + '%._');
+      lines.push('_Wastage refers to the removal of scales, fins, intestines, and head, resulting in the net usable weight._');
+    }
     lines.push('');
     lines.push('*Total: \u20AC' + grandTotal.toFixed(2) + '*');
 
