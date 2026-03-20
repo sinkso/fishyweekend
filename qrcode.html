@@ -193,7 +193,7 @@ header p {
 }
 
 .btn-print {
-  display: inline-block;
+  display: block;
   padding: 12px 32px;
   border: none;
   border-radius: 12px;
@@ -202,12 +202,19 @@ header p {
   font-family: 'Fredoka One', cursive;
   font-size: 1em;
   cursor: pointer;
-  margin-top: 12px;
+  margin: 16px auto 0 auto;
   transition: opacity 0.2s;
 }
 
 .btn-print:hover {
   opacity: 0.9;
+}
+
+.print-options {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
 }
 
 /* ---------- QR output ---------- */
@@ -339,12 +346,25 @@ header p {
   }
 
   .qr-result-card h3,
-  .btn-print {
+  .btn-print,
+  .print-options {
+    display: none !important;
+  }
+
+  body.print-qr-only #preview-card {
     display: none !important;
   }
 
   #qr-code {
     margin-bottom: 10px;
+  }
+
+  #qr-code canvas {
+    display: none !important;
+  }
+
+  #qr-code img {
+    display: block !important;
   }
 
   .view-card {
@@ -417,15 +437,18 @@ header p {
 
   <button class="btn-generate" onclick="generateQR()">Generate QR Code</button>
 
-  <div id="qr-output">
-    <div class="qr-result-card">
-      <h3>QR Code Ready</h3>
-      <div id="qr-code"></div>
-      <button class="btn-print" onclick="window.print()">Print Label</button>
-    </div>
-    <div id="preview-card"></div>
-  </div>
+</div>
 
+<div class="container" id="qr-output">
+  <div class="qr-result-card">
+    <h3>QR Code Ready</h3>
+    <div id="qr-code"></div>
+    <div class="print-options">
+      <button class="btn-print" onclick="printLabel('qr')">Print QR Only</button>
+      <button class="btn-print" onclick="printLabel('full')">Print Full Label</button>
+    </div>
+  </div>
+  <div id="preview-card"></div>
 </div>
 
 <!-- ========== VIEWER MODE ========== -->
@@ -440,7 +463,7 @@ header p {
    No backend. Data encoded in URL. Old-style JS to match index.html.
    ============================================================ */
 
-var BASE_URL = 'https://www.fishyweekend.com/trace.html';
+var BASE_URL = 'https://www.fishyweekend.com/qrcode.html';
 
 /* ---------- Initialization ---------- */
 
@@ -524,6 +547,16 @@ function generateQR() {
     correctLevel: QRCode.CorrectLevel.M
   });
 
+  // Ensure the img element has the QR data for print (canvas doesn't print in most browsers)
+  setTimeout(function() {
+    var canvas = qrContainer.querySelector('canvas');
+    var img = qrContainer.querySelector('img');
+    if (canvas && img) {
+      img.src = canvas.toDataURL('image/png');
+      img.style.display = 'block';
+    }
+  }, 50);
+
   // Show output section
   document.getElementById('qr-output').style.display = 'block';
 
@@ -574,6 +607,17 @@ function buildViewCardHTML(data) {
       '<div class="view-body">' + sanitizeHtml(data.b) + '</div>' +
       '<div class="view-footer">www.fishyweekend.com</div>' +
     '</div>';
+}
+
+/* ---------- Print ---------- */
+
+function printLabel(mode) {
+  if (mode === 'qr') {
+    document.body.classList.add('print-qr-only');
+  } else {
+    document.body.classList.remove('print-qr-only');
+  }
+  window.print();
 }
 
 /* ---------- Helpers ---------- */
