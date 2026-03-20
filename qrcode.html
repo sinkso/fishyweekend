@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fishy Weekend — QR Label</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --ocean-deep: #dbeeff;
+  --ocean-mid:  #b8d9f8;
+  --gold:       #e67e00;
+  --gold-light: #f59500;
+  --orange:     #c45c00;
+  --white:      #1a3a5c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--ocean-deep);
+  color: var(--white);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+header {
+  background: linear-gradient(135deg, #2b7cb9, #1a5a8a);
+  color: #fff;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+header img.logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+header h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.4em;
+  letter-spacing: 1px;
+}
+
+header p {
+  font-size: 0.85em;
+  opacity: 0.9;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ---------- Form ---------- */
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85em;
+  margin-bottom: 4px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--ocean-mid);
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95em;
+  color: var(--white);
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+/* ---------- Toolbar + Editor ---------- */
+
+.editor-wrap {
+  border: 2px solid var(--ocean-mid);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.editor-wrap:focus-within {
+  border-color: var(--gold);
+}
+
+.toolbar {
+  display: flex;
+  gap: 2px;
+  padding: 6px 8px;
+  background: var(--ocean-mid);
+  border-bottom: 1px solid #a8cce8;
+  flex-wrap: wrap;
+}
+
+.toolbar button {
+  background: #fff;
+  border: 1px solid #c0d8ec;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85em;
+  font-weight: 700;
+  color: var(--white);
+  cursor: pointer;
+  transition: background 0.15s;
+  line-height: 1.3;
+}
+
+.toolbar button:hover {
+  background: var(--ocean-deep);
+}
+
+.toolbar button.active {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+
+#editor {
+  min-height: 180px;
+  padding: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95em;
+  color: var(--white);
+  outline: none;
+  line-height: 1.6;
+}
+
+#editor ul, #editor ol {
+  margin-left: 20px;
+}
+
+#editor h3 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.05em;
+  margin: 4px 0;
+}
+
+.editor-hint {
+  font-size: 0.75em;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn-generate {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: var(--gold);
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1em;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(230, 126, 0, 0.35);
+  transition: background 0.2s;
+  margin-top: 16px;
+}
+
+.btn-generate:hover {
+  background: var(--gold-light);
+}
+
+.btn-print {
+  display: block;
+  padding: 12px 32px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2b7cb9, #1a5a8a);
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1em;
+  cursor: pointer;
+  margin: 16px auto 0 auto;
+  transition: opacity 0.2s;
+}
+
+.btn-print:hover {
+  opacity: 0.9;
+}
+
+.print-options {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* ---------- QR output ---------- */
+
+#qr-output {
+  display: none;
+  margin-top: 24px;
+}
+
+.qr-result-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.qr-result-card h3 {
+  font-family: 'Fredoka One', cursive;
+  margin-bottom: 16px;
+  color: var(--white);
+}
+
+#qr-code {
+  display: inline-block;
+  margin: 0 auto 16px auto;
+}
+
+#qr-code img,
+#qr-code canvas {
+  border-radius: 8px;
+}
+
+/* ---------- Viewer card ---------- */
+
+.view-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  margin-top: 16px;
+}
+
+.view-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--ocean-mid);
+  margin-bottom: 16px;
+}
+
+.view-card-header img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.view-card-header .brand {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1em;
+  color: #2b7cb9;
+}
+
+.view-card-header .sub {
+  font-size: 0.75em;
+  color: #888;
+}
+
+.view-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.15em;
+  margin-bottom: 12px;
+}
+
+.view-body {
+  font-size: 0.92em;
+  line-height: 1.7;
+}
+
+.view-body ul, .view-body ol {
+  margin-left: 20px;
+}
+
+.view-body h3 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1em;
+  margin: 8px 0 4px 0;
+}
+
+.view-footer {
+  text-align: center;
+  font-size: 0.75em;
+  color: #aaa;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ocean-mid);
+}
+
+.view-date {
+  font-size: 0.8em;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+/* ---------- Print ---------- */
+
+@media print {
+  body {
+    background: #fff;
+    padding: 0;
+    margin: 0;
+  }
+
+  header,
+  #generator {
+    display: none !important;
+  }
+
+  #qr-output {
+    display: block !important;
+    margin: 0;
+  }
+
+  .qr-result-card {
+    box-shadow: none;
+    padding: 10px;
+  }
+
+  .qr-result-card h3,
+  .btn-print,
+  .print-options {
+    display: none !important;
+  }
+
+  body.print-qr-only #preview-card {
+    display: none !important;
+  }
+
+  #qr-code {
+    margin-bottom: 10px;
+  }
+
+  #qr-code canvas {
+    display: none !important;
+  }
+
+  #qr-code img {
+    display: block !important;
+  }
+
+  .view-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    padding: 14px;
+    margin-top: 10px;
+    page-break-inside: avoid;
+  }
+
+  .view-card-header img {
+    display: none;
+  }
+
+  .container {
+    padding: 0;
+    max-width: 100%;
+  }
+}
+
+/* ---------- Viewer mode ---------- */
+
+#viewer {
+  display: none;
+}
+
+.viewer-hint {
+  text-align: center;
+  font-size: 0.8em;
+  color: #888;
+  margin-top: 12px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <img src="fishy_weekend_logo.jpg" alt="Fishy Weekend Logo" class="logo">
+    <div class="header-text">
+      <h1>Fishy Weekend</h1>
+      <p id="header-subtitle">QR Label Generator</p>
+    </div>
+  </div>
+</header>
+
+<!-- ========== GENERATOR MODE ========== -->
+<div class="container" id="generator">
+
+  <div class="form-group" style="margin-top:16px;">
+    <label for="label-title">Title</label>
+    <input type="text" id="label-title" placeholder="e.g. Salmon — North Sea, Fresh Catch">
+  </div>
+
+  <div class="form-group">
+    <label>Content</label>
+    <div class="editor-wrap">
+      <div class="toolbar">
+        <button type="button" onclick="execFmt('bold')" title="Bold"><b>B</b></button>
+        <button type="button" onclick="execFmt('italic')" title="Italic"><i>I</i></button>
+        <button type="button" onclick="execFmt('underline')" title="Underline"><u>U</u></button>
+        <button type="button" onclick="execFmt('insertUnorderedList')" title="Bullet list">&#8226; List</button>
+        <button type="button" onclick="execFmt('insertOrderedList')" title="Numbered list">1. List</button>
+        <button type="button" onclick="insertHeading()" title="Heading">H</button>
+      </div>
+      <div id="editor" contenteditable="true"></div>
+    </div>
+    <div class="editor-hint">Use the toolbar for formatting. All formatting is preserved in the QR code.</div>
+  </div>
+
+  <button class="btn-generate" onclick="generateQR()">Generate QR Code</button>
+
+</div>
+
+<div class="container" id="qr-output">
+  <div class="qr-result-card">
+    <h3>QR Code Ready</h3>
+    <div id="qr-code"></div>
+    <div class="print-options">
+      <button class="btn-print" onclick="printLabel('qr')">Print QR Only</button>
+      <button class="btn-print" onclick="printLabel('full')">Print Full Label</button>
+    </div>
+  </div>
+  <div id="preview-card"></div>
+</div>
+
+<!-- ========== VIEWER MODE ========== -->
+<div class="container" id="viewer">
+  <div id="viewer-card"></div>
+  <div class="viewer-hint">Powered by Fishy Weekend — www.fishyweekend.com</div>
+</div>
+
+<script>
+/* ============================================================
+   Fishy Weekend — QR Label Generator
+   No backend. Data encoded in URL. Old-style JS to match index.html.
+   ============================================================ */
+
+var BASE_URL = 'https://www.fishyweekend.com/qrcode.html';
+
+/* ---------- Initialization ---------- */
+
+(function init() {
+  var params = new URLSearchParams(window.location.search);
+  var dataParam = params.get('d');
+
+  if (dataParam) {
+    showViewerMode(dataParam);
+  } else {
+    showGeneratorMode();
+  }
+})();
+
+/* ---------- Generator Mode ---------- */
+
+function showGeneratorMode() {
+  document.getElementById('generator').style.display = 'block';
+  document.getElementById('viewer').style.display = 'none';
+}
+
+/* ---------- Toolbar formatting ---------- */
+
+function execFmt(command) {
+  document.getElementById('editor').focus();
+  document.execCommand(command, false, null);
+}
+
+function insertHeading() {
+  document.getElementById('editor').focus();
+  document.execCommand('formatBlock', false, 'h3');
+}
+
+/* ---------- Generate QR ---------- */
+
+function generateQR() {
+  var title = document.getElementById('label-title').value.trim();
+  if (!title) {
+    alert('Please enter a title.');
+    return;
+  }
+
+  var editorEl = document.getElementById('editor');
+  var bodyHtml = editorEl.innerHTML.trim();
+
+  if (!bodyHtml || bodyHtml === '<br>') {
+    alert('Please enter some content.');
+    return;
+  }
+
+  var data = {
+    t: title,
+    b: bodyHtml,
+    d: new Date().toISOString().split('T')[0]
+  };
+
+  // Encode: JSON → UTF-8-safe base64
+  var json = JSON.stringify(data);
+  var encoded = btoa(unescape(encodeURIComponent(json)));
+  var url = BASE_URL + '?d=' + encodeURIComponent(encoded);
+
+  // Check URL length — QR codes can handle ~4000 chars but get harder to scan
+  if (url.length > 3000) {
+    var proceed = confirm(
+      'The content is quite long (' + url.length + ' characters). ' +
+      'Large QR codes may be harder to scan. Continue?'
+    );
+    if (!proceed) return;
+  }
+
+  // Render QR code
+  var qrContainer = document.getElementById('qr-code');
+  qrContainer.innerHTML = '';
+
+  new QRCode(qrContainer, {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: '#1a3a5c',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  // Ensure the img element has the QR data for print (canvas doesn't print in most browsers)
+  setTimeout(function() {
+    var canvas = qrContainer.querySelector('canvas');
+    var img = qrContainer.querySelector('img');
+    if (canvas && img) {
+      img.src = canvas.toDataURL('image/png');
+      img.style.display = 'block';
+    }
+  }, 50);
+
+  // Show output section
+  document.getElementById('qr-output').style.display = 'block';
+
+  // Render preview card
+  var previewCard = document.getElementById('preview-card');
+  previewCard.innerHTML = buildViewCardHTML(data);
+
+  // Scroll to result
+  document.getElementById('qr-output').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ---------- Viewer Mode ---------- */
+
+function showViewerMode(dataParam) {
+  document.getElementById('generator').style.display = 'none';
+  document.getElementById('viewer').style.display = 'block';
+  document.getElementById('header-subtitle').textContent = 'Product Information';
+
+  try {
+    var json = decodeURIComponent(escape(atob(decodeURIComponent(dataParam))));
+    var data = JSON.parse(json);
+
+    document.getElementById('viewer-card').innerHTML = buildViewCardHTML(data);
+    document.title = 'Fishy Weekend — ' + (data.t || 'Label');
+  } catch (e) {
+    document.getElementById('viewer-card').innerHTML =
+      '<div class="view-card" style="text-align:center;padding:40px;">' +
+        '<p style="font-size:1.2em;font-weight:700;">Unable to read label data.</p>' +
+        '<p style="margin-top:8px;color:#888;">The QR code may be damaged or the link is invalid.</p>' +
+      '</div>';
+  }
+}
+
+/* ---------- Shared: Build view card HTML ---------- */
+
+function buildViewCardHTML(data) {
+  return '' +
+    '<div class="view-card">' +
+      '<div class="view-card-header">' +
+        '<img src="fishy_weekend_logo.jpg" alt="Logo">' +
+        '<div>' +
+          '<div class="brand">Fishy Weekend</div>' +
+          '<div class="sub">Product Information</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="view-date">Created: ' + formatDate(data.d) + '</div>' +
+      '<div class="view-title">' + escapeHtml(data.t) + '</div>' +
+      '<div class="view-body">' + sanitizeHtml(data.b) + '</div>' +
+      '<div class="view-footer">www.fishyweekend.com</div>' +
+    '</div>';
+}
+
+/* ---------- Print ---------- */
+
+function printLabel(mode) {
+  if (mode === 'qr') {
+    document.body.classList.add('print-qr-only');
+  } else {
+    document.body.classList.remove('print-qr-only');
+  }
+  window.print();
+}
+
+/* ---------- Helpers ---------- */
+
+function escapeHtml(str) {
+  if (!str) return '';
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
+function sanitizeHtml(html) {
+  if (!html) return '';
+  // Allow only safe tags: b, i, u, strong, em, ul, ol, li, br, h3, p, div
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+
+  // Remove script, style, iframe, etc.
+  var dangerous = tmp.querySelectorAll('script, style, iframe, object, embed, form, input, textarea, select, button, link, meta');
+  for (var i = 0; i < dangerous.length; i++) {
+    dangerous[i].parentNode.removeChild(dangerous[i]);
+  }
+
+  // Strip event handlers from all elements
+  var allEls = tmp.querySelectorAll('*');
+  for (var j = 0; j < allEls.length; j++) {
+    var attrs = allEls[j].attributes;
+    for (var k = attrs.length - 1; k >= 0; k--) {
+      if (attrs[k].name.indexOf('on') === 0) {
+        allEls[j].removeAttribute(attrs[k].name);
+      }
+    }
+    // Also remove href="javascript:" links
+    if (allEls[j].tagName === 'A' && allEls[j].getAttribute('href') && allEls[j].getAttribute('href').toLowerCase().indexOf('javascript:') === 0) {
+      allEls[j].removeAttribute('href');
+    }
+  }
+
+  return tmp.innerHTML;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'N/A';
+  try {
+    var parts = dateStr.split('-');
+    return parts[2] + '-' + parts[1] + '-' + parts[0]; // DD-MM-YYYY
+  } catch (e) {
+    return escapeHtml(dateStr);
+  }
+}
+</script>
+</body>
+</html>
