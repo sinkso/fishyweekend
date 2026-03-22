@@ -609,8 +609,8 @@ header p {
 
   <div class="info-section">
     <p><b>Orders / Delivery</b></p>
-    <p>Now delivering on <strong>Saturdays</strong>!</p>
-    <p>Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday.</p>
+    <p id="delivery-days-text">Now delivering on <strong>Saturdays</strong>!</p>
+    <p id="delivery-order-text">Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday.</p>
     <p>At the moment, we deliver <strong>only within Almere</strong>, but we're working on expanding delivery to other regions.</p>
   </div>
 
@@ -687,6 +687,10 @@ header p {
   ];
   var PRICES = {};
   var WEIGHTS = [500, 1000, 1500, 2000];
+  var DELIVERY_DAYS = [
+    { id: 'saturday', label: 'Saturday', enabled: true },
+    { id: 'sunday',   label: 'Sunday',   enabled: false }
+  ];
 
   var WA_NUMBER = '31612088019'; // kishore
 
@@ -700,6 +704,7 @@ header p {
   var SPREADSHEET_ID = '1zL1pgTzVr_kfhqzVKvuSVG3tmY2eOJbvAVrHaDoq9Ys';
   var CONFIG_CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Config';
   var FISH_CSV_URL   = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Fish';
+  var DELIVERY_CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=DeliveryDays';
 
   /* ── CSV PARSER & CONFIG LOADER ── */
 
@@ -751,7 +756,7 @@ header p {
     return result;
   }
 
-  function applyConfigFromSheet(configRows, fishRows) {
+  function applyConfigFromSheet(configRows, fishRows, deliveryRows) {
     // Apply Config tab (key-value pairs)
     for (var i = 0; i < configRows.length; i++) {
       var key = (configRows[i].key || '').toUpperCase();
@@ -797,6 +802,24 @@ header p {
       FISH = newFish;
       PRICES = newPrices;
     }
+
+    // Apply DeliveryDays tab
+    if (deliveryRows && deliveryRows.length > 0) {
+      var newDays = [];
+      for (var dd = 0; dd < deliveryRows.length; dd++) {
+        var dr = deliveryRows[dd];
+        var dayId = (dr.id || '').toLowerCase().trim();
+        if (!dayId) continue;
+        newDays.push({
+          id: dayId,
+          label: dr.label || dayId.charAt(0).toUpperCase() + dayId.slice(1),
+          enabled: (dr.enabled || '').toUpperCase() === 'TRUE'
+        });
+      }
+      if (newDays.length > 0) {
+        DELIVERY_DAYS = newDays;
+      }
+    }
   }
 
   var configSource = 'defaults';
@@ -817,14 +840,14 @@ header p {
 
     document.querySelector('.container').style.opacity = '0.4';
 
-    var configDone = false, fishDone = false;
-    var configRows = [], fishRows = [];
+    var configDone = false, fishDone = false, deliveryDone = false;
+    var configRows = [], fishRows = [], deliveryRows = [];
     var sheetLoaded = false;
 
     function checkDone() {
-      if (configDone && fishDone) {
+      if (configDone && fishDone && deliveryDone) {
         if (sheetLoaded) {
-          applyConfigFromSheet(configRows, fishRows);
+          applyConfigFromSheet(configRows, fishRows, deliveryRows);
           configSource = 'sheet';
         } else {
           configSource = 'defaults';
@@ -863,6 +886,21 @@ header p {
       fishDone = true;
       checkDone();
     });
+
+    fetch(DELIVERY_CSV_URL).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function(text) {
+      if (text.trim().charAt(0) !== '<') {
+        deliveryRows = parseCSV(text);
+        sheetLoaded = true;
+      }
+    }).catch(function(err) {
+      console.warn('DeliveryDays fetch failed:', err);
+    }).finally(function() {
+      deliveryDone = true;
+      checkDone();
+    });
   }
 
 
@@ -873,7 +911,7 @@ header p {
   var prepWeight   = {};
   var fishHeadAnswer = null;   // 'yes' or 'no'
   var spicyLevel     = null;   // 'low', 'medium', 'high', 'no-preference'
-  var deliveryDay    = 'saturday';   // default to saturday
+  var deliveryDay    = null;   // auto-set to first enabled day from DELIVERY_DAYS
   var deliveryTime   = null;   // 'before-12', '13-14', 'after-14'
 
   /* ── VALIDATION ── */
@@ -1146,16 +1184,21 @@ header p {
     // Delivery day
     var dayContainer = document.getElementById('delivery-day-options');
     dayContainer.innerHTML = '';
-    var dayChoices = [
-      { value: 'saturday', label: 'Saturday', enabled: true },
-      { value: 'sunday',   label: 'Sunday',   enabled: false }
-    ];
-    for (var d = 0; d < dayChoices.length; d++) {
+    // If current deliveryDay is disabled or missing, reset to first enabled day
+    var dayValid = false;
+    var firstEnabled = null;
+    for (var dd = 0; dd < DELIVERY_DAYS.length; dd++) {
+      if (DELIVERY_DAYS[dd].enabled && !firstEnabled) firstEnabled = DELIVERY_DAYS[dd].id;
+      if (DELIVERY_DAYS[dd].id === deliveryDay && DELIVERY_DAYS[dd].enabled) dayValid = true;
+    }
+    if (!dayValid) deliveryDay = firstEnabled;
+
+    for (var d = 0; d < DELIVERY_DAYS.length; d++) {
       (function(choice) {
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'option-btn';
-        if (deliveryDay === choice.value) btn.className += ' active';
+        if (deliveryDay === choice.id) btn.className += ' active';
         if (!choice.enabled) {
           btn.disabled = true;
           btn.style.opacity = '0.4';
@@ -1164,11 +1207,11 @@ header p {
         btn.textContent = choice.label;
         btn.addEventListener('click', function() {
           if (btn.disabled) return;
-          deliveryDay = (deliveryDay === choice.value) ? null : choice.value;
+          deliveryDay = (deliveryDay === choice.id) ? null : choice.id;
           renderAll();
         });
         dayContainer.appendChild(btn);
-      })(dayChoices[d]);
+      })(DELIVERY_DAYS[d]);
     }
 
     // Delivery time
@@ -1516,8 +1559,46 @@ header p {
       document.body.appendChild(overlay);
     }
 
+    updateDeliveryTexts();
     renderAll();
     showConfigSource();
+  }
+
+  function updateDeliveryTexts() {
+    var enabledDays = [];
+    for (var i = 0; i < DELIVERY_DAYS.length; i++) {
+      if (DELIVERY_DAYS[i].enabled) enabledDays.push(DELIVERY_DAYS[i].label);
+    }
+    if (enabledDays.length === 0) return;
+
+    // "Saturdays" / "Saturdays & Sundays"
+    var plural = enabledDays.map(function(d) { return d + 's'; });
+    var dayListPlural;
+    if (plural.length === 1) {
+      dayListPlural = plural[0];
+    } else {
+      dayListPlural = plural.slice(0, -1).join(', ') + ' & ' + plural[plural.length - 1];
+    }
+
+    // "Saturday" / "Saturday or Sunday"
+    var dayListSingular;
+    if (enabledDays.length === 1) {
+      dayListSingular = enabledDays[0];
+    } else {
+      dayListSingular = enabledDays.slice(0, -1).join(', ') + ' or ' + enabledDays[enabledDays.length - 1];
+    }
+
+    var el1 = document.getElementById('delivery-days-text');
+    if (el1) el1.innerHTML = 'Now delivering on <strong>' + dayListPlural + '</strong>!';
+
+    var el2 = document.getElementById('delivery-order-text');
+    if (el2) {
+      if (enabledDays.length === 1) {
+        el2.innerHTML = 'Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on ' + enabledDays[0] + '.';
+      } else {
+        el2.innerHTML = 'Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on your preferred delivery day.';
+      }
+    }
   }
 
   // Load config from Google Sheet, then initialize
