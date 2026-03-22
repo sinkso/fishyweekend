@@ -609,8 +609,8 @@ header p {
 
   <div class="info-section">
     <p><b>Orders / Delivery</b></p>
-    <p>Now delivering on <strong>Saturdays & Sundays</strong>!</p>
-    <p>Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday or Sunday.</p>
+    <p>Now delivering on <strong>Saturdays</strong>!</p>
+    <p>Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday.</p>
     <p>At the moment, we deliver <strong>only within Almere</strong>, but we're working on expanding delivery to other regions.</p>
   </div>
 
@@ -873,7 +873,7 @@ header p {
   var prepWeight   = {};
   var fishHeadAnswer = null;   // 'yes' or 'no'
   var spicyLevel     = null;   // 'low', 'medium', 'high', 'no-preference'
-  var deliveryDay    = null;   // 'saturday' or 'sunday'
+  var deliveryDay    = 'saturday';   // default to saturday
   var deliveryTime   = null;   // 'before-12', '13-14', 'after-14'
 
   /* ── VALIDATION ── */
@@ -1147,8 +1147,8 @@ header p {
     var dayContainer = document.getElementById('delivery-day-options');
     dayContainer.innerHTML = '';
     var dayChoices = [
-      { value: 'saturday', label: 'Saturday' },
-      { value: 'sunday',   label: 'Sunday' }
+      { value: 'saturday', label: 'Saturday', enabled: true },
+      { value: 'sunday',   label: 'Sunday',   enabled: false }
     ];
     for (var d = 0; d < dayChoices.length; d++) {
       (function(choice) {
@@ -1156,8 +1156,14 @@ header p {
         btn.type = 'button';
         btn.className = 'option-btn';
         if (deliveryDay === choice.value) btn.className += ' active';
+        if (!choice.enabled) {
+          btn.disabled = true;
+          btn.style.opacity = '0.4';
+          btn.style.cursor = 'not-allowed';
+        }
         btn.textContent = choice.label;
         btn.addEventListener('click', function() {
+          if (btn.disabled) return;
           deliveryDay = (deliveryDay === choice.value) ? null : choice.value;
           renderAll();
         });
