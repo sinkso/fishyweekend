@@ -534,18 +534,33 @@ function generateQR() {
     if (!proceed) return;
   }
 
-  // Render QR code
+  // Render QR code — try decreasing correction levels if data is too large
   var qrContainer = document.getElementById('qr-code');
   qrContainer.innerHTML = '';
 
-  new QRCode(qrContainer, {
-    text: url,
-    width: 200,
-    height: 200,
-    colorDark: '#1a3a5c',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.M
-  });
+  var levels = [QRCode.CorrectLevel.M, QRCode.CorrectLevel.L];
+  var success = false;
+  for (var i = 0; i < levels.length; i++) {
+    try {
+      new QRCode(qrContainer, {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: '#1a3a5c',
+        colorLight: '#ffffff',
+        correctLevel: levels[i]
+      });
+      success = true;
+      break;
+    } catch (e) {
+      qrContainer.innerHTML = '';
+    }
+  }
+
+  if (!success) {
+    alert('Content is too long to fit in a QR code. Please shorten the text and try again.');
+    return;
+  }
 
   // Ensure the img element has the QR data for print (canvas doesn't print in most browsers)
   setTimeout(function() {
