@@ -36,10 +36,11 @@ function doPost(e) {
         'Spicy Level',
         'Delivery Day',
         'Delivery Time',
-        'Special Instructions'
+        'Special Instructions',
+        'Coupon Code'
       ]);
       // Bold the header row
-      sheet.getRange(1, 1, 1, 12).setFontWeight('bold');
+      sheet.getRange(1, 1, 1, 13).setFontWeight('bold');
     }
 
     sheet.appendRow([
@@ -54,7 +55,8 @@ function doPost(e) {
       data.spicyLevel || '',
       data.deliveryDay || '',
       data.deliveryTime || '',
-      data.specialInstructions || ''
+      data.specialInstructions || '',
+      data.couponCode || ''
     ]);
 
     return ContentService

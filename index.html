@@ -549,6 +549,116 @@ header p {
   border-top: 2px solid var(--gold);
 }
 
+/* Coupon toggle */
+.question-group .coupon-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.2);
+  border-radius: 24px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.toggle-slider:before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--gold);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.coupon-input-wrap {
+  margin-top: 10px;
+}
+
+.coupon-input-wrap input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--white);
+  outline: none;
+  transition: border-color 0.2s, opacity 0.2s;
+}
+
+.coupon-input-wrap input[type="text"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: rgba(255,255,255,0.5);
+}
+
+.coupon-input-wrap input[type="text"]:focus {
+  border-color: var(--gold);
+}
+
+.coupon-status {
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-top: 6px;
+  color: #2e7d32;
+}
+
+/* Summary discount lines */
+.summary-subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  opacity: 0.75;
+}
+
+.summary-discount {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-top: 4px;
+  color: #2e7d32;
+}
+
 /* WhatsApp button */
 .wa-button {
   display: block;
@@ -662,6 +772,19 @@ header p {
       <label>Special instructions or allergy information</label>
       <textarea id="special-instructions" placeholder="Please provide any special instructions or allergy information"></textarea>
     </div>
+    <div class="question-group">
+      <label class="coupon-toggle-row" for="coupon-toggle">
+        <span>I have a coupon / discount code</span>
+        <div class="toggle-switch">
+          <input type="checkbox" id="coupon-toggle">
+          <span class="toggle-slider"></span>
+        </div>
+      </label>
+      <div id="coupon-input-group" class="coupon-input-wrap">
+        <input type="text" id="coupon-code" placeholder="Enter coupon code" disabled>
+        <div class="coupon-status" id="coupon-status"></div>
+      </div>
+    </div>
     <div class="validation-msg" id="details-validation-msg"></div>
   </div>
 
@@ -695,7 +818,7 @@ header p {
   var WA_NUMBER = '31612088019'; // kishore
 
   // Google Apps Script Web App URL — replace with your deployed URL
-  var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPGueJkS2jQdVtaPW89sWhYRPoGM5qIktFeNDcFms0vCuIiaW_jhOAhRoWWN634peh/exec';  // e.g. 'https://script.google.com/macros/s/AKfycbx.../exec'
+  var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaHQdhRrLKE9SnqB4VbBbUlrHEqZDXR-e9XHuX8OYrLM-yBFMIbr3nd1DQuX6PDvGw/exec';
   // var GOOGLE_SCRIPT_URL = ''; // leave empty to disable server-side order saving (WhatsApp confirmation will still work)'
 
   // ── Google Sheet CSV URLs ──
@@ -913,6 +1036,9 @@ header p {
   var spicyLevel     = null;   // 'low', 'medium', 'high', 'no-preference'
   var deliveryDay    = null;   // auto-set to first enabled day from DELIVERY_DAYS
   var deliveryTime   = null;   // 'before-12', '13-14', 'after-14'
+  var hasCoupon      = null;   // 'yes' or 'no'
+  var couponCode     = '';
+  var discountApplied = false;
 
   /* ── VALIDATION ── */
 
@@ -953,6 +1079,7 @@ header p {
   function renderAll() {
     renderFishGrid();
     renderQuestions();
+    renderCoupon();
     renderSummary();
   }
 
@@ -1255,6 +1382,12 @@ header p {
     }
   }
 
+  function renderCoupon() {
+    var toggle = document.getElementById('coupon-toggle');
+    if (toggle) toggle.checked = (hasCoupon === 'yes');
+    document.getElementById('coupon-code').disabled = (hasCoupon !== 'yes');
+  }
+
   function renderSummary() {
     var summary = document.getElementById('order-summary');
     summary.innerHTML = '';
@@ -1312,6 +1445,31 @@ header p {
       emptyDiv.textContent = 'Select fish, preparation, and weight to see your order.';
       summary.appendChild(emptyDiv);
     } else {
+      if (discountApplied) {
+        var subtotalDiv = document.createElement('div');
+        subtotalDiv.className = 'summary-subtotal';
+        var subtotalLabel = document.createElement('span');
+        subtotalLabel.textContent = 'Subtotal';
+        var subtotalValue = document.createElement('span');
+        subtotalValue.textContent = '\u20AC' + grandTotal.toFixed(2);
+        subtotalDiv.appendChild(subtotalLabel);
+        subtotalDiv.appendChild(subtotalValue);
+        summary.appendChild(subtotalDiv);
+
+        var discountAmount = grandTotal * 0.10;
+        var discountDiv = document.createElement('div');
+        discountDiv.className = 'summary-discount';
+        var discountLabel = document.createElement('span');
+        discountLabel.textContent = 'Coupon discount (10%)';
+        var discountValue = document.createElement('span');
+        discountValue.textContent = '-\u20AC' + discountAmount.toFixed(2);
+        discountDiv.appendChild(discountLabel);
+        discountDiv.appendChild(discountValue);
+        summary.appendChild(discountDiv);
+
+        grandTotal = grandTotal - discountAmount;
+      }
+
       var totalDiv = document.createElement('div');
       totalDiv.className = 'summary-total';
       var totalLabel = document.createElement('span');
@@ -1443,6 +1601,12 @@ header p {
       lines.push('_Wastage refers to the removal of scales, fins, intestines, and head, resulting in the net usable weight._');
     }
     lines.push('');
+    if (discountApplied) {
+      var discountAmt = grandTotal * 0.10;
+      lines.push('Subtotal: \u20AC' + grandTotal.toFixed(2));
+      lines.push('Discount (10%): -\u20AC' + discountAmt.toFixed(2));
+      grandTotal = grandTotal - discountAmt;
+    }
     lines.push('*Total: \u20AC' + grandTotal.toFixed(2) + '*');
 
     lines.push('');
@@ -1479,13 +1643,16 @@ header p {
       }
     }
 
+    var finalTotal = discountApplied ? grandTotal * 0.90 : grandTotal;
     return {
       name: c.name,
       phone: c.phone,
       postal: c.postal,
       door: c.door,
       orderItems: orderLines.join('\n'),
-      grandTotal: 'EUR ' + grandTotal.toFixed(2),
+      grandTotal: 'EUR ' + finalTotal.toFixed(2),
+      couponCode: discountApplied ? couponCode : '',
+      discount: discountApplied ? '10%' : '',
       fishHead: fishHeadAnswer ? (fishHeadAnswer === 'yes' ? 'Yes' : 'No') : '',
       spicyLevel: spicyLevel ? (spicyMap[spicyLevel] || spicyLevel) : '',
       deliveryDay: deliveryDay ? (dayMap[deliveryDay] || deliveryDay) : '',
@@ -1543,6 +1710,29 @@ header p {
       renderSummary();
     });
   }
+
+  document.getElementById('coupon-toggle').addEventListener('change', function() {
+    hasCoupon = this.checked ? 'yes' : 'no';
+    var codeInput = document.getElementById('coupon-code');
+    codeInput.disabled = !this.checked;
+    if (!this.checked) {
+      couponCode = '';
+      discountApplied = false;
+      codeInput.value = '';
+      document.getElementById('coupon-status').textContent = '';
+      renderSummary();
+    } else {
+      codeInput.focus();
+    }
+  });
+
+  document.getElementById('coupon-code').addEventListener('input', function() {
+    couponCode = this.value.trim();
+    discountApplied = couponCode.length > 0;
+    var statusEl = document.getElementById('coupon-status');
+    statusEl.textContent = discountApplied ? '10% discount applied!' : '';
+    renderSummary();
+  });
 
   function initApp() {
     // If site is closed, show overlay and block ordering
