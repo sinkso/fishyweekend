@@ -1740,12 +1740,9 @@ header p {
       var overlay = document.createElement('div');
       overlay.id = 'site-closed-overlay';
       overlay.innerHTML =
-        '<div style="background:#fff;border-radius:16px;padding:40px 30px;max-width:420px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.15);">' +
-          '<div style="font-size:3rem;margin-bottom:12px;">🐟</div>' +
-          '<h2 style="font-family:Fredoka One,cursive;color:#1a3a5c;margin:0 0 12px;">We\'ll Be Back!</h2>' +
-          '<p style="font-family:Nunito,sans-serif;color:#3a5a7c;font-size:1rem;line-height:1.5;margin:0;">Fishy Weekend is currently busy preparing orders for this week. Please check back later for next weekend!</p>' +
-        '</div>';
-      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+        '<img src="temp_break.jpeg" alt="Deliveries temporarily paused — resuming 23rd May" ' +
+          'style="max-width:90%;max-height:90vh;border-radius:16px;box-shadow:0 4px 32px rgba(0,0,0,0.4);display:block;">';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;';
       document.body.appendChild(overlay);
     }
 
