@@ -108,6 +108,7 @@ header p {
   background: linear-gradient(135deg, #e8f4fd, #d4ecfa);
   border-radius: 12px;
   padding: 14px 16px;
+  margin-top: 24px;
   margin-bottom: 8px;
   border-left: 4px solid #3a7bbf;
   font-size: 0.88rem;
@@ -125,6 +126,7 @@ header p {
 .info-section p:last-child {
   margin-bottom: 0;
 }
+
 
 .container {
   max-width: 600px;
@@ -659,6 +661,126 @@ header p {
   color: #2e7d32;
 }
 
+/* Special products */
+.special-card {
+  background: var(--ocean-mid);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.special-card.unavailable {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.special-emoji {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.special-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.special-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.05rem;
+}
+
+.special-price-label {
+  font-size: 0.78rem;
+  color: #5a7a8a;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.special-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.special-weight-row {
+  display: flex;
+  gap: 5px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.special-weight-btn {
+  padding: 5px 10px;
+  border: 2px solid #b8d9f8;
+  border-radius: 20px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #fff;
+  color: var(--white);
+  transition: all 0.15s;
+}
+
+.special-weight-btn:hover {
+  border-color: var(--gold);
+  background: #fff5e6;
+  color: var(--gold);
+}
+
+.special-weight-btn.chosen {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+
+.special-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qty-btn {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--white);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--white);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.15s;
+}
+
+.qty-btn:hover {
+  background: var(--white);
+  color: #dbeeff;
+}
+
+.qty-value {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+
+.special-line-total {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
 /* WhatsApp button */
 .wa-button {
   display: block;
@@ -717,13 +839,6 @@ header p {
 
 <div class="container">
 
-  <div class="info-section">
-    <p><b>Orders / Delivery</b></p>
-    <p id="delivery-days-text">Now delivering on <strong>Saturdays</strong>!</p>
-    <p id="delivery-order-text">Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday.</p>
-    <p>At the moment, we deliver <strong>only within Almere</strong>, but we're working on expanding delivery to other regions.</p>
-  </div>
-
   <div class="section-title">Your Details</div>
   <div class="customer-section">
     <label for="cust-name">Name <span class="required">*</span></label>
@@ -744,29 +859,50 @@ header p {
     <div class="validation-msg" id="customer-validation-msg">Please fill in all your details above to place an order.</div>
   </div>
 
-  <div class="section-title">Choose Your Fish</div>
-  <div class="section-subtext">We supply larger-sized fish, ensuring superior taste and better cuts for an elegant presentation on your menu.</div>
-  <div id="fish-grid"></div>
+  <div id="fish-section-wrapper">
+    <div class="info-section">
+      <p><b>Fish Orders / Delivery</b></p>
+      <p id="delivery-days-text">Now delivering on <strong>Saturdays</strong>!</p>
+      <p id="delivery-order-text">Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday.</p>
+      <p>At the moment, we deliver <strong>only within Almere</strong>, but we're working on expanding delivery to other regions.</p>
+    </div>
+    <div class="section-title">Choose Your Fish</div>
+    <div class="section-subtext">We supply larger-sized fish, ensuring superior taste and better cuts for an elegant presentation on your menu.</div>
+    <div id="fish-grid"></div>
+  </div>
+
+  <div id="specials-section-wrapper">
+    <div class="info-section specials-info">
+      <p><b>Special Products — Pre-order</b></p>
+      <p>Preorder your favorites today! We are taking pre-orders and will confirm a delivery date once ready.</p>
+    </div>
+    <div class="section-title">Special Products</div>
+    <div class="section-subtext">Grandma's secret recipes. Made with love, spices & tradition.</div>
+    <div id="specials-grid"></div>
+  </div>
 
   <div class="section-title">Additional Details</div>
   <div class="questions-section">
-    <div class="question-group">
-      <label>Do you need Fish head?</label>
-      <div class="option-buttons" id="fishhead-options"></div>
-    </div>
-    <div class="question-group disabled-group" id="spicy-group">
-      <label>What Spicy Level do you need for curry/fry?</label>
-      <div class="option-buttons" id="spicy-options"></div>
-      <div class="disabled-hint" id="spicy-hint">Select a Curry or Fry preparation to choose spicy level</div>
-    </div>
-    <div class="question-group">
-      <label>Preferred delivery day</label>
-      <div class="option-buttons" id="delivery-day-options"></div>
-    </div>
-    <div class="question-group">
-      <label>Preferred delivery time</label>
-      <div class="option-buttons" id="delivery-time-options"></div>
-      <div class="disabled-hint" id="delivery-time-hint" style="display:none;"></div>
+    <div id="fish-questions-wrapper">
+      <div class="question-group">
+        <label>Do you need Fish head?</label>
+        <div class="option-buttons" id="fishhead-options"></div>
+      </div>
+      <div class="question-group disabled-group" id="spicy-group">
+        <label>What Spicy Level do you need for curry/fry?</label>
+        <div class="option-buttons" id="spicy-options"></div>
+        <div class="disabled-hint" id="spicy-hint">Select a Curry or Fry preparation to choose spicy level</div>
+      </div>
+      <div class="question-group">
+        <label>Preferred delivery day</label>
+        <div class="option-buttons" id="delivery-day-options"></div>
+      </div>
+      <div class="question-group">
+        <label>Preferred delivery time</label>
+        <div class="option-buttons" id="delivery-time-options"></div>
+        <div class="disabled-hint" id="delivery-time-hint" style="display:none;"></div>
+      </div>
+      <div class="validation-msg" id="details-validation-msg"></div>
     </div>
     <div class="question-group">
       <label>Special instructions or allergy information</label>
@@ -785,7 +921,6 @@ header p {
         <div class="coupon-status" id="coupon-status"></div>
       </div>
     </div>
-    <div class="validation-msg" id="details-validation-msg"></div>
   </div>
 
   <div class="section-title">Order Summary</div>
@@ -801,7 +936,15 @@ header p {
   /* ── CONFIGURATION — loaded from Google Sheet ── */
 
   var SITE_OPEN = true;
+  var SHOW_FISH    = true;
+  var SHOW_SPECIAL = true;
   var FISH = [];
+  var SPECIALS = [
+    { id: 'chemmeen_roast',      name: 'Chemmeen Roast',      emoji: '\uD83E\uDD90', available: true, price_per_200g: 12, weights: [200, 400] },
+    { id: 'chemmeen_achar',      name: 'Chemmeen Achar',      emoji: '\uD83E\uDD90', available: true, price_per_200g: 9,  weights: [200, 400] },
+    { id: 'chemmeen_chammanthi', name: 'Chemmeen Chammanthi', emoji: '\uD83E\uDD90', available: true, price_per_200g: 9,  weights: [200, 400] },
+    { id: 'kadumanga_achar',     name: 'Kadumanga Achar',     emoji: '\uD83E\uDD6D', available: true, price_per_200g: 5,  weights: [200, 400] }
+  ];
   var PREPS = [
     { id: 'uncleaned', label: 'Raw (Uncleaned & Whole Fish)', icon: '\uD83D\uDC1F', minWeight: 1000 },
     { id: 'cleaned',   label: 'Raw (Cleaned)',                icon: '\u2702\uFE0F',  minWeight: 1000 },
@@ -825,9 +968,10 @@ header p {
   // Share your sheet as "Anyone with the link" (Viewer)
   // The sheet needs two tabs: "Config" (key/value pairs) and "Fish" (fish + prices)
   var SPREADSHEET_ID = '1zL1pgTzVr_kfhqzVKvuSVG3tmY2eOJbvAVrHaDoq9Ys';
-  var CONFIG_CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Config';
-  var FISH_CSV_URL   = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Fish';
+  var CONFIG_CSV_URL   = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Config';
+  var FISH_CSV_URL     = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Fish';
   var DELIVERY_CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=DeliveryDays';
+  var SPECIALS_CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Specials';
 
   /* ── CSV PARSER & CONFIG LOADER ── */
 
@@ -879,14 +1023,39 @@ header p {
     return result;
   }
 
-  function applyConfigFromSheet(configRows, fishRows, deliveryRows) {
+  function applyConfigFromSheet(configRows, fishRows, deliveryRows, specialRows) {
     // Apply Config tab (key-value pairs)
     for (var i = 0; i < configRows.length; i++) {
       var key = (configRows[i].key || '').toUpperCase();
       var val = configRows[i].value || '';
-      if (key === 'SITE_OPEN') {
-        SITE_OPEN = val.toUpperCase() === 'TRUE';
+      if (key === 'SITE_OPEN')    SITE_OPEN    = val.toUpperCase() === 'TRUE';
+      if (key === 'SHOW_FISH')    SHOW_FISH    = val.toUpperCase() !== 'FALSE';
+      if (key === 'SHOW_SPECIAL') SHOW_SPECIAL = val.toUpperCase() !== 'FALSE';
+    }
+
+    // Apply Specials tab
+    if (specialRows && specialRows.length > 0) {
+      var newSpecials = [];
+      for (var s = 0; s < specialRows.length; s++) {
+        var sr = specialRows[s];
+        var sid = (sr.id || '').toLowerCase().trim();
+        if (!sid) continue;
+        var rawWeights = (sr.weights || '200').split(',');
+        var parsedWeights = [];
+        for (var w = 0; w < rawWeights.length; w++) {
+          var wv = parseInt(rawWeights[w].trim());
+          if (!isNaN(wv)) parsedWeights.push(wv);
+        }
+        newSpecials.push({
+          id: sid,
+          name: sr.name || sid,
+          emoji: sr.emoji || '\uD83E\uDD90',
+          available: (sr.available || '').toUpperCase() === 'TRUE',
+          price_per_200g: parseFloat(sr.price_per_200g) || 0,
+          weights: parsedWeights.length > 0 ? parsedWeights : [200]
+        });
       }
+      if (newSpecials.length > 0) SPECIALS = newSpecials;
     }
 
     // Apply Fish tab (fish list + prices)
@@ -963,14 +1132,14 @@ header p {
 
     document.querySelector('.container').style.opacity = '0.4';
 
-    var configDone = false, fishDone = false, deliveryDone = false;
-    var configRows = [], fishRows = [], deliveryRows = [];
+    var configDone = false, fishDone = false, deliveryDone = false, specialsDone = false;
+    var configRows = [], fishRows = [], deliveryRows = [], specialRows = [];
     var sheetLoaded = false;
 
     function checkDone() {
-      if (configDone && fishDone && deliveryDone) {
+      if (configDone && fishDone && deliveryDone && specialsDone) {
         if (sheetLoaded) {
-          applyConfigFromSheet(configRows, fishRows, deliveryRows);
+          applyConfigFromSheet(configRows, fishRows, deliveryRows, specialRows);
           configSource = 'sheet';
         } else {
           configSource = 'defaults';
@@ -1024,6 +1193,21 @@ header p {
       deliveryDone = true;
       checkDone();
     });
+
+    fetch(SPECIALS_CSV_URL).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function(text) {
+      if (text.trim().charAt(0) !== '<') {
+        specialRows = parseCSV(text);
+        sheetLoaded = true;
+      }
+    }).catch(function(err) {
+      console.warn('Specials fetch failed:', err);
+    }).finally(function() {
+      specialsDone = true;
+      checkDone();
+    });
   }
 
 
@@ -1039,6 +1223,8 @@ header p {
   var hasCoupon      = null;   // 'yes' or 'no'
   var couponCode     = '';
   var discountApplied = false;
+  var specialWeight  = {};   // specialWeight['chemmeen_roast'] = 200 or 400
+  var specialQty     = {};   // specialQty['chemmeen_roast'] = 1, 2, 3...
 
   /* ── VALIDATION ── */
 
@@ -1058,29 +1244,145 @@ header p {
   }
 
   function isAdditionalDetailsComplete() {
-    if (!fishHeadAnswer) return false;
-    if (!deliveryDay) return false;
-    if (!deliveryTime) return false;
-    if (hasCurryOrFry() && !spicyLevel) return false;
+    if (SHOW_FISH) {
+      if (!fishHeadAnswer) return false;
+      if (!deliveryDay) return false;
+      if (!deliveryTime) return false;
+      if (hasCurryOrFry() && !spicyLevel) return false;
+    }
     return true;
   }
 
   function getMissingDetails() {
     var missing = [];
-    if (!fishHeadAnswer) missing.push('Fish head preference');
-    if (hasCurryOrFry() && !spicyLevel) missing.push('Spicy level');
-    if (!deliveryDay) missing.push('Delivery day');
-    if (!deliveryTime) missing.push('Delivery time');
+    if (SHOW_FISH) {
+      if (!fishHeadAnswer) missing.push('Fish head preference');
+      if (hasCurryOrFry() && !spicyLevel) missing.push('Spicy level');
+      if (!deliveryDay) missing.push('Delivery day');
+      if (!deliveryTime) missing.push('Delivery time');
+    }
     return missing;
   }
 
   /* ── RENDER ── */
 
   function renderAll() {
+    document.getElementById('fish-section-wrapper').style.display    = SHOW_FISH    ? '' : 'none';
+    document.getElementById('specials-section-wrapper').style.display = SHOW_SPECIAL ? '' : 'none';
+    document.getElementById('fish-questions-wrapper').style.display   = SHOW_FISH    ? '' : 'none';
     renderFishGrid();
+    renderSpecials();
     renderQuestions();
     renderCoupon();
     renderSummary();
+  }
+
+  function renderSpecials() {
+    var grid = document.getElementById('specials-grid');
+    grid.innerHTML = '';
+
+    for (var i = 0; i < SPECIALS.length; i++) {
+      (function(sp) {
+        var card = document.createElement('div');
+        card.className = 'special-card' + (sp.available ? '' : ' unavailable');
+
+        var emojiDiv = document.createElement('div');
+        emojiDiv.className = 'special-emoji';
+        emojiDiv.textContent = sp.emoji;
+
+        var infoDiv = document.createElement('div');
+        infoDiv.className = 'special-info';
+
+        var nameDiv = document.createElement('div');
+        nameDiv.className = 'special-name';
+        nameDiv.textContent = sp.name;
+
+        var priceDiv = document.createElement('div');
+        priceDiv.className = 'special-price-label';
+        priceDiv.textContent = '\u20AC' + sp.price_per_200g.toFixed(2) + ' / 200g';
+
+        infoDiv.appendChild(nameDiv);
+        infoDiv.appendChild(priceDiv);
+
+        // Weight buttons — under the product name
+        var weightRow = document.createElement('div');
+        weightRow.className = 'special-weight-row';
+        for (var w = 0; w < sp.weights.length; w++) {
+          (function(wt) {
+            var wBtn = document.createElement('button');
+            wBtn.type = 'button';
+            wBtn.className = 'special-weight-btn' + (specialWeight[sp.id] === wt ? ' chosen' : '');
+            wBtn.textContent = wt + 'g';
+            wBtn.addEventListener('click', function() {
+              if (specialWeight[sp.id] === wt) {
+                specialWeight[sp.id] = null;
+                specialQty[sp.id] = 0;
+              } else {
+                specialWeight[sp.id] = wt;
+                if (!specialQty[sp.id]) specialQty[sp.id] = 1;
+              }
+              renderAll();
+            });
+            weightRow.appendChild(wBtn);
+          })(sp.weights[w]);
+        }
+        infoDiv.appendChild(weightRow);
+
+        var controlsDiv = document.createElement('div');
+        controlsDiv.className = 'special-controls';
+
+        // Qty row (only when weight selected)
+        if (specialWeight[sp.id]) {
+          var qty = specialQty[sp.id] || 1;
+          var lineTotal = sp.price_per_200g * (specialWeight[sp.id] / 200) * qty;
+
+          var qtyRow = document.createElement('div');
+          qtyRow.className = 'special-qty-row';
+
+          var minusBtn = document.createElement('button');
+          minusBtn.type = 'button';
+          minusBtn.className = 'qty-btn';
+          minusBtn.textContent = '\u2212';
+          minusBtn.addEventListener('click', function() {
+            if (specialQty[sp.id] > 1) {
+              specialQty[sp.id]--;
+            } else {
+              specialQty[sp.id] = 0;
+              specialWeight[sp.id] = null;
+            }
+            renderAll();
+          });
+
+          var qtyVal = document.createElement('span');
+          qtyVal.className = 'qty-value';
+          qtyVal.textContent = qty;
+
+          var plusBtn = document.createElement('button');
+          plusBtn.type = 'button';
+          plusBtn.className = 'qty-btn';
+          plusBtn.textContent = '+';
+          plusBtn.addEventListener('click', function() {
+            specialQty[sp.id] = (specialQty[sp.id] || 1) + 1;
+            renderAll();
+          });
+
+          qtyRow.appendChild(minusBtn);
+          qtyRow.appendChild(qtyVal);
+          qtyRow.appendChild(plusBtn);
+          controlsDiv.appendChild(qtyRow);
+
+          var totalSpan = document.createElement('div');
+          totalSpan.className = 'special-line-total';
+          totalSpan.textContent = '\u20AC' + lineTotal.toFixed(2);
+          controlsDiv.appendChild(totalSpan);
+        }
+
+        card.appendChild(emojiDiv);
+        card.appendChild(infoDiv);
+        card.appendChild(controlsDiv);
+        grid.appendChild(card);
+      })(SPECIALS[i]);
+    }
   }
 
   function renderFishGrid() {
@@ -1311,14 +1613,12 @@ header p {
     // Delivery day
     var dayContainer = document.getElementById('delivery-day-options');
     dayContainer.innerHTML = '';
-    // If current deliveryDay is disabled or missing, reset to first enabled day
-    var dayValid = false;
-    var firstEnabled = null;
+    // If current deliveryDay is now disabled, clear it — but never auto-select
     for (var dd = 0; dd < DELIVERY_DAYS.length; dd++) {
-      if (DELIVERY_DAYS[dd].enabled && !firstEnabled) firstEnabled = DELIVERY_DAYS[dd].id;
-      if (DELIVERY_DAYS[dd].id === deliveryDay && DELIVERY_DAYS[dd].enabled) dayValid = true;
+      if (DELIVERY_DAYS[dd].id === deliveryDay && !DELIVERY_DAYS[dd].enabled) {
+        deliveryDay = null;
+      }
     }
-    if (!dayValid) deliveryDay = firstEnabled;
 
     for (var d = 0; d < DELIVERY_DAYS.length; d++) {
       (function(choice) {
@@ -1439,10 +1739,41 @@ header p {
       }
     }
 
+    // Specials
+    for (var si = 0; si < SPECIALS.length; si++) {
+      var sp = SPECIALS[si];
+      if (specialWeight[sp.id] && specialQty[sp.id] > 0) {
+        hasItem = true;
+        var qty = specialQty[sp.id];
+        var spLineTotal = sp.price_per_200g * (specialWeight[sp.id] / 200) * qty;
+        grandTotal += spLineTotal;
+
+        var spDiv = document.createElement('div');
+        spDiv.className = 'summary-item';
+
+        var spNameDiv = document.createElement('div');
+        spNameDiv.className = 'summary-fish-name';
+        spNameDiv.textContent = sp.emoji + ' ' + sp.name;
+        spDiv.appendChild(spNameDiv);
+
+        var spLineDiv = document.createElement('div');
+        spLineDiv.className = 'summary-prep-line';
+        var spLeft = document.createElement('span');
+        spLeft.textContent = specialWeight[sp.id] + 'g \u00D7 ' + qty;
+        var spRight = document.createElement('span');
+        spRight.textContent = '\u20AC' + spLineTotal.toFixed(2);
+        spLineDiv.appendChild(spLeft);
+        spLineDiv.appendChild(spRight);
+        spDiv.appendChild(spLineDiv);
+
+        summary.appendChild(spDiv);
+      }
+    }
+
     if (!hasItem) {
       var emptyDiv = document.createElement('div');
       emptyDiv.className = 'summary-empty';
-      emptyDiv.textContent = 'Select fish, preparation, and weight to see your order.';
+      emptyDiv.textContent = 'Select items to see your order.';
       summary.appendChild(emptyDiv);
     } else {
       if (discountApplied) {
@@ -1572,6 +1903,17 @@ header p {
       }
     }
 
+    // Specials
+    for (var si = 0; si < SPECIALS.length; si++) {
+      var sp = SPECIALS[si];
+      if (specialWeight[sp.id] && specialQty[sp.id] > 0) {
+        var spTotal = sp.price_per_200g * (specialWeight[sp.id] / 200) * specialQty[sp.id];
+        grandTotal += spTotal;
+        lines.push('*' + sp.name + '*');
+        lines.push('  ' + specialWeight[sp.id] + 'g \u00D7 ' + specialQty[sp.id] + ' = \u20AC' + spTotal.toFixed(2));
+      }
+    }
+
     lines.push('');
     if (fishHeadAnswer) {
       lines.push('Fish head: ' + (fishHeadAnswer === 'yes' ? 'Yes' : 'No'));
@@ -1640,6 +1982,15 @@ header p {
             orderLines.push(fish.name + ' - ' + prep.label + ' - ' + wLabel + ' = EUR ' + lineTotal.toFixed(2));
           }
         }
+      }
+    }
+
+    for (var si = 0; si < SPECIALS.length; si++) {
+      var sp = SPECIALS[si];
+      if (specialWeight[sp.id] && specialQty[sp.id] > 0) {
+        var spTotal = sp.price_per_200g * (specialWeight[sp.id] / 200) * specialQty[sp.id];
+        grandTotal += spTotal;
+        orderLines.push(sp.name + ' - ' + specialWeight[sp.id] + 'g x' + specialQty[sp.id] + ' = EUR ' + spTotal.toFixed(2));
       }
     }
 
