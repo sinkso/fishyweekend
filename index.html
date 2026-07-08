@@ -781,6 +781,66 @@ header p {
   color: var(--gold);
 }
 
+/* Spices */
+.spice-card {
+  background: var(--ocean-mid);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.spice-card.unavailable {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.spice-emoji {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.spice-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.spice-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.05rem;
+}
+
+.spice-origin {
+  font-size: 0.78rem;
+  color: #5a7a8a;
+  font-weight: 600;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.spice-price-label {
+  font-size: 0.78rem;
+  color: #5a7a8a;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.spice-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.spice-line-total {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
 /* WhatsApp button */
 .wa-button {
   display: block;
@@ -862,23 +922,31 @@ header p {
   <div id="fish-section-wrapper">
     <div class="info-section">
       <p><b>Fish Orders / Delivery</b></p>
-      <p id="delivery-days-text">Now delivering on <strong>Saturdays</strong>!</p>
-      <p id="delivery-order-text">Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on Saturday.</p>
-      <p>At the moment, we deliver <strong>only within Almere</strong>, but we're working on expanding delivery to other regions.</p>
+      <p id="delivery-order-text">Place your order <strong>before Thursday </strong> and receive it <strong>at your home before 14:00</strong> on Saturday.</p>
     </div>
-    <div class="section-title">Choose Your Fish</div>
-    <div class="section-subtext">We supply larger-sized fish, ensuring superior taste and better cuts for an elegant presentation on your menu.</div>
+    <div class="section-title">Fresh Fish</div>
+    <div class="section-subtext">Enjoy premium-quality fresh fish, sourced daily and delivered with freshness you can trust. We clean and cut your fish to your preference, then deliver it fresh to your doorstep.</div>
     <div id="fish-grid"></div>
   </div>
 
   <div id="specials-section-wrapper">
-    <div class="info-section specials-info">
+    <!-- <div class="info-section specials-info">
       <p><b>Special Products — Pre-order</b></p>
       <p>Preorder your favorites today! We are taking pre-orders and will confirm a delivery date once ready.</p>
-    </div>
-    <div class="section-title">Special Products</div>
-    <div class="section-subtext">Grandma's secret recipes. Made with love, spices & tradition.</div>
+    </div> -->
+    <div class="section-title">Ready-to-Eat Seafood</div>
+    <div class="section-subtext">Enjoy delicious, authentic seafood specialties made with fresh ingredients and traditional flavors—ready to eat anytime.</div>
     <div id="specials-grid"></div>
+  </div>
+
+  <div id="spices-section-wrapper">
+    <!-- <div class="info-section spices-info">
+      <p><b>Spices — Sourced at Origin</b></p>
+      <p>Pure, aromatic spices sourced directly from Wayanad, Kerala and beyond.</p>
+    </div> -->
+    <div class="section-title">Premium Spices</div>
+    <div class="section-subtext">Discover a handpicked selection of premium spices, carefully sourced to bring rich aroma, authentic flavor, and exceptional quality to every dish.</div>
+    <div id="spices-grid"></div>
   </div>
 
   <div class="section-title">Additional Details</div>
@@ -894,11 +962,7 @@ header p {
         <div class="disabled-hint" id="spicy-hint">Select a Curry or Fry preparation to choose spicy level</div>
       </div>
       <div class="question-group">
-        <label>Preferred delivery day</label>
-        <div class="option-buttons" id="delivery-day-options"></div>
-      </div>
-      <div class="question-group">
-        <label>Preferred delivery time</label>
+        <label>Preferred delivery time on Saturday</label>
         <div class="option-buttons" id="delivery-time-options"></div>
         <div class="disabled-hint" id="delivery-time-hint" style="display:none;"></div>
       </div>
@@ -924,7 +988,7 @@ header p {
   </div>
 
   <div class="section-title">Order Summary</div>
-  <div class="section-subtext">Enjoy a relaxing weekend with fresh & quality fish.</div>
+  <div class="section-subtext">Goodness on your plate. Happiness in every bite.</div>
   <div class="summary-section" id="order-summary"></div>
 
   <button class="wa-button disabled" id="wa-btn" disabled>Submit Order & Confirm via WhatsApp</button>
@@ -938,6 +1002,7 @@ header p {
   var SITE_OPEN = true;
   var SHOW_FISH    = true;
   var SHOW_SPECIAL = true;
+  var SHOW_SPICES  = true;
   var FISH = [];
   var SPECIALS = [
     { id: 'chemmeen_roast',      name: 'Chemmeen Roast',      emoji: '\uD83E\uDD90', available: true, price_per_200g: 12, weights: [200, 400] },
@@ -945,14 +1010,22 @@ header p {
     { id: 'chemmeen_chammanthi', name: 'Chemmeen Chammanthi', emoji: '\uD83E\uDD90', available: true, price_per_200g: 9,  weights: [200, 400] },
     { id: 'kadumanga_achar',     name: 'Kadumanga Achar',     emoji: '\uD83E\uDD6D', available: true, price_per_200g: 5,  weights: [200, 400] }
   ];
+  var SPICES = [
+    { id: 'cardamom', name: 'Cardamom', origin: 'Wayanad, Kerala', emoji: '\uD83C\uDF3F', available: true, weight: 50,  price: 1.00 },
+    { id: 'cloves',   name: 'Cloves',   origin: 'Wayanad, Kerala', emoji: '\uD83C\uDF38', available: true, weight: 50,  price: 1.00 },
+    { id: 'cinnamon', name: 'Cinnamon', origin: 'Wayanad, Kerala', emoji: '\uD83E\uDEB5', available: true, weight: 50,  price: 1.00 },
+    { id: 'pepper',   name: 'Pepper',   origin: 'Wayanad, Kerala', emoji: '\u26AB',       available: true, weight: 100, price: 1.00 },
+    { id: 'javithri', name: 'Javithri', origin: 'Wayanad, Kerala', emoji: '\uD83C\uDF42', available: true, weight: 50,  price: 1.00 },
+    { id: 'saffron',  name: 'Saffron',  origin: 'Iran',            emoji: '\uD83C\uDF3C', available: true, weight: 1,   price: 1.00 }
+  ];
   var PREPS = [
-    { id: 'uncleaned', label: 'Raw (Uncleaned & Whole Fish)', icon: '\uD83D\uDC1F', minWeight: 1000 },
-    { id: 'cleaned',   label: 'Raw (Cleaned)',                icon: '\u2702\uFE0F',  minWeight: 1000 },
+    { id: 'cleaned',   label: 'Raw (Cleaned)',                icon: '\u2702\uFE0F',  minWeight: 500  },
     { id: 'curry',     label: 'Curry',                        icon: '\uD83C\uDF5B',  minWeight: 500  },
     { id: 'fry',       label: 'Fry',                          icon: '\uD83C\uDF73',  minWeight: 500  }
   ];
   var PRICES = {};
   var WEIGHTS = [500, 1000, 1500, 2000];
+  var CLEANED_500G_SURCHARGE = 1.00; // extra charge per item when Raw (Cleaned) fish is ordered at 500g
   var DELIVERY_DAYS = [
     { id: 'saturday', label: 'Saturday', enabled: true },
     { id: 'sunday',   label: 'Sunday',   enabled: false }
@@ -972,6 +1045,7 @@ header p {
   var FISH_CSV_URL     = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Fish';
   var DELIVERY_CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=DeliveryDays';
   var SPECIALS_CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Specials';
+  var SPICES_CSV_URL   = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Spices';
 
   /* ── CSV PARSER & CONFIG LOADER ── */
 
@@ -1023,7 +1097,7 @@ header p {
     return result;
   }
 
-  function applyConfigFromSheet(configRows, fishRows, deliveryRows, specialRows) {
+  function applyConfigFromSheet(configRows, fishRows, deliveryRows, specialRows, spiceRows) {
     // Apply Config tab (key-value pairs)
     for (var i = 0; i < configRows.length; i++) {
       var key = (configRows[i].key || '').toUpperCase();
@@ -1031,6 +1105,7 @@ header p {
       if (key === 'SITE_OPEN')    SITE_OPEN    = val.toUpperCase() === 'TRUE';
       if (key === 'SHOW_FISH')    SHOW_FISH    = val.toUpperCase() !== 'FALSE';
       if (key === 'SHOW_SPECIAL') SHOW_SPECIAL = val.toUpperCase() !== 'FALSE';
+      if (key === 'SHOW_SPICES')  SHOW_SPICES  = val.toUpperCase() !== 'FALSE';
     }
 
     // Apply Specials tab
@@ -1058,6 +1133,27 @@ header p {
       if (newSpecials.length > 0) SPECIALS = newSpecials;
     }
 
+    // Apply Spices tab
+    if (spiceRows && spiceRows.length > 0) {
+      var newSpices = [];
+      for (var sp = 0; sp < spiceRows.length; sp++) {
+        var spr = spiceRows[sp];
+        var spid = (spr.id || '').toLowerCase().trim();
+        if (!spid) continue;
+        var spWeight = parseFloat(spr.weight);
+        newSpices.push({
+          id: spid,
+          name: spr.name || spid,
+          origin: spr.origin || '',
+          emoji: spr.emoji || '🌿',
+          available: (spr.available || '').toUpperCase() === 'TRUE',
+          weight: isNaN(spWeight) ? 50 : spWeight,
+          price: parseFloat(spr.price) || 0
+        });
+      }
+      if (newSpices.length > 0) SPICES = newSpices;
+    }
+
     // Apply Fish tab (fish list + prices)
     if (fishRows.length > 0) {
       var newFish = [];
@@ -1079,7 +1175,7 @@ header p {
         });
 
         var priceObj = {};
-        var prepIds = ['cleaned', 'curry', 'fry', 'uncleaned'];
+        var prepIds = ['cleaned', 'curry', 'fry'];
         for (var p = 0; p < prepIds.length; p++) {
           var priceVal = r[prepIds[p]];
           if (priceVal !== undefined && priceVal !== '' && !isNaN(parseFloat(priceVal))) {
@@ -1132,14 +1228,14 @@ header p {
 
     document.querySelector('.container').style.opacity = '0.4';
 
-    var configDone = false, fishDone = false, deliveryDone = false, specialsDone = false;
-    var configRows = [], fishRows = [], deliveryRows = [], specialRows = [];
+    var configDone = false, fishDone = false, deliveryDone = false, specialsDone = false, spicesDone = false;
+    var configRows = [], fishRows = [], deliveryRows = [], specialRows = [], spiceRows = [];
     var sheetLoaded = false;
 
     function checkDone() {
-      if (configDone && fishDone && deliveryDone && specialsDone) {
+      if (configDone && fishDone && deliveryDone && specialsDone && spicesDone) {
         if (sheetLoaded) {
-          applyConfigFromSheet(configRows, fishRows, deliveryRows, specialRows);
+          applyConfigFromSheet(configRows, fishRows, deliveryRows, specialRows, spiceRows);
           configSource = 'sheet';
         } else {
           configSource = 'defaults';
@@ -1208,6 +1304,21 @@ header p {
       specialsDone = true;
       checkDone();
     });
+
+    fetch(SPICES_CSV_URL).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function(text) {
+      if (text.trim().charAt(0) !== '<') {
+        spiceRows = parseCSV(text);
+        sheetLoaded = true;
+      }
+    }).catch(function(err) {
+      console.warn('Spices fetch failed:', err);
+    }).finally(function() {
+      spicesDone = true;
+      checkDone();
+    });
   }
 
 
@@ -1218,13 +1329,14 @@ header p {
   var prepWeight   = {};
   var fishHeadAnswer = null;   // 'yes' or 'no'
   var spicyLevel     = null;   // 'low', 'medium', 'high', 'no-preference'
-  var deliveryDay    = null;   // auto-set to first enabled day from DELIVERY_DAYS
   var deliveryTime   = null;   // 'before-12', '13-14', 'after-14'
   var hasCoupon      = null;   // 'yes' or 'no'
   var couponCode     = '';
   var discountApplied = false;
   var specialWeight  = {};   // specialWeight['chemmeen_roast'] = 200 or 400
   var specialQty     = {};   // specialQty['chemmeen_roast'] = 1, 2, 3...
+  var spiceWeight    = {};   // spiceWeight['cardamom'] = 50 (its fixed pack weight) or null if not selected
+  var spiceQty       = {};   // spiceQty['cardamom'] = 1, 2, 3... once selected
 
   /* ── VALIDATION ── */
 
@@ -1246,7 +1358,6 @@ header p {
   function isAdditionalDetailsComplete() {
     if (SHOW_FISH) {
       if (!fishHeadAnswer) return false;
-      if (!deliveryDay) return false;
       if (!deliveryTime) return false;
       if (hasCurryOrFry() && !spicyLevel) return false;
     }
@@ -1258,7 +1369,6 @@ header p {
     if (SHOW_FISH) {
       if (!fishHeadAnswer) missing.push('Fish head preference');
       if (hasCurryOrFry() && !spicyLevel) missing.push('Spicy level');
-      if (!deliveryDay) missing.push('Delivery day');
       if (!deliveryTime) missing.push('Delivery time');
     }
     return missing;
@@ -1269,9 +1379,11 @@ header p {
   function renderAll() {
     document.getElementById('fish-section-wrapper').style.display    = SHOW_FISH    ? '' : 'none';
     document.getElementById('specials-section-wrapper').style.display = SHOW_SPECIAL ? '' : 'none';
+    document.getElementById('spices-section-wrapper').style.display  = SHOW_SPICES  ? '' : 'none';
     document.getElementById('fish-questions-wrapper').style.display   = SHOW_FISH    ? '' : 'none';
     renderFishGrid();
     renderSpecials();
+    renderSpices();
     renderQuestions();
     renderCoupon();
     renderSummary();
@@ -1304,37 +1416,43 @@ header p {
         infoDiv.appendChild(nameDiv);
         infoDiv.appendChild(priceDiv);
 
-        // Weight buttons — under the product name
-        var weightRow = document.createElement('div');
-        weightRow.className = 'special-weight-row';
-        for (var w = 0; w < sp.weights.length; w++) {
-          (function(wt) {
-            var wBtn = document.createElement('button');
-            wBtn.type = 'button';
-            wBtn.className = 'special-weight-btn' + (specialWeight[sp.id] === wt ? ' chosen' : '');
-            wBtn.textContent = wt + 'g';
-            wBtn.addEventListener('click', function() {
-              if (specialWeight[sp.id] === wt) {
-                specialWeight[sp.id] = null;
-                specialQty[sp.id] = 0;
-              } else {
-                specialWeight[sp.id] = wt;
-                if (!specialQty[sp.id]) specialQty[sp.id] = 1;
-              }
-              renderAll();
-            });
-            weightRow.appendChild(wBtn);
-          })(sp.weights[w]);
+        // Only one weight option: skip the tap-to-select chip, go straight to a quantity stepper.
+        // More than one weight option: keep the tap-a-chip-first pattern (weight is ambiguous otherwise).
+        var singleWeight = sp.weights.length === 1 ? sp.weights[0] : null;
+
+        if (!singleWeight) {
+          var weightRow = document.createElement('div');
+          weightRow.className = 'special-weight-row';
+          for (var w = 0; w < sp.weights.length; w++) {
+            (function(wt) {
+              var wBtn = document.createElement('button');
+              wBtn.type = 'button';
+              wBtn.className = 'special-weight-btn' + (specialWeight[sp.id] === wt ? ' chosen' : '');
+              wBtn.textContent = wt + 'g';
+              wBtn.addEventListener('click', function() {
+                if (specialWeight[sp.id] === wt) {
+                  specialWeight[sp.id] = null;
+                  specialQty[sp.id] = 0;
+                } else {
+                  specialWeight[sp.id] = wt;
+                  if (!specialQty[sp.id]) specialQty[sp.id] = 1;
+                }
+                renderAll();
+              });
+              weightRow.appendChild(wBtn);
+            })(sp.weights[w]);
+          }
+          infoDiv.appendChild(weightRow);
         }
-        infoDiv.appendChild(weightRow);
 
         var controlsDiv = document.createElement('div');
         controlsDiv.className = 'special-controls';
 
-        // Qty row (only when weight selected)
-        if (specialWeight[sp.id]) {
-          var qty = specialQty[sp.id] || 1;
-          var lineTotal = sp.price_per_200g * (specialWeight[sp.id] / 200) * qty;
+        // Qty row — always visible for single-weight items; only once a weight chip is picked otherwise
+        if (singleWeight || specialWeight[sp.id]) {
+          var qty = specialQty[sp.id] || 0;
+          var effectiveWeight = singleWeight || specialWeight[sp.id];
+          var lineTotal = sp.price_per_200g * (effectiveWeight / 200) * qty;
 
           var qtyRow = document.createElement('div');
           qtyRow.className = 'special-qty-row';
@@ -1344,12 +1462,9 @@ header p {
           minusBtn.className = 'qty-btn';
           minusBtn.textContent = '\u2212';
           minusBtn.addEventListener('click', function() {
-            if (specialQty[sp.id] > 1) {
-              specialQty[sp.id]--;
-            } else {
-              specialQty[sp.id] = 0;
-              specialWeight[sp.id] = null;
-            }
+            var newQty = Math.max(0, (specialQty[sp.id] || 0) - 1);
+            specialQty[sp.id] = newQty;
+            specialWeight[sp.id] = newQty > 0 ? effectiveWeight : null;
             renderAll();
           });
 
@@ -1362,7 +1477,8 @@ header p {
           plusBtn.className = 'qty-btn';
           plusBtn.textContent = '+';
           plusBtn.addEventListener('click', function() {
-            specialQty[sp.id] = (specialQty[sp.id] || 1) + 1;
+            specialQty[sp.id] = (specialQty[sp.id] || 0) + 1;
+            specialWeight[sp.id] = effectiveWeight;
             renderAll();
           });
 
@@ -1371,10 +1487,12 @@ header p {
           qtyRow.appendChild(plusBtn);
           controlsDiv.appendChild(qtyRow);
 
-          var totalSpan = document.createElement('div');
-          totalSpan.className = 'special-line-total';
-          totalSpan.textContent = '\u20AC' + lineTotal.toFixed(2);
-          controlsDiv.appendChild(totalSpan);
+          if (qty > 0) {
+            var totalSpan = document.createElement('div');
+            totalSpan.className = 'special-line-total';
+            totalSpan.textContent = '\u20AC' + lineTotal.toFixed(2);
+            controlsDiv.appendChild(totalSpan);
+          }
         }
 
         card.appendChild(emojiDiv);
@@ -1382,6 +1500,94 @@ header p {
         card.appendChild(controlsDiv);
         grid.appendChild(card);
       })(SPECIALS[i]);
+    }
+  }
+
+  function renderSpices() {
+    var grid = document.getElementById('spices-grid');
+    grid.innerHTML = '';
+
+    for (var i = 0; i < SPICES.length; i++) {
+      (function(spice) {
+        var card = document.createElement('div');
+        card.className = 'spice-card' + (spice.available ? '' : ' unavailable');
+
+        var emojiDiv = document.createElement('div');
+        emojiDiv.className = 'spice-emoji';
+        emojiDiv.textContent = spice.emoji;
+
+        var infoDiv = document.createElement('div');
+        infoDiv.className = 'spice-info';
+
+        var nameDiv = document.createElement('div');
+        nameDiv.className = 'spice-name';
+        nameDiv.textContent = spice.name;
+
+        var originDiv = document.createElement('div');
+        originDiv.className = 'spice-origin';
+        originDiv.textContent = spice.origin;
+
+        var priceDiv = document.createElement('div');
+        priceDiv.className = 'spice-price-label';
+        priceDiv.textContent = '€' + spice.price.toFixed(2) + ' / ' + spice.weight + 'g';
+
+        infoDiv.appendChild(nameDiv);
+        if (spice.origin) infoDiv.appendChild(originDiv);
+        infoDiv.appendChild(priceDiv);
+
+        // Every spice has exactly one pack weight, so skip the tap-to-select chip
+        // and show the quantity stepper directly (there's nothing to disambiguate).
+        var controlsDiv = document.createElement('div');
+        controlsDiv.className = 'spice-controls';
+
+        var qty = spiceQty[spice.id] || 0;
+        var lineTotal = spice.price * qty;
+
+        var qtyRow = document.createElement('div');
+        qtyRow.className = 'special-qty-row';
+
+        var minusBtn = document.createElement('button');
+        minusBtn.type = 'button';
+        minusBtn.className = 'qty-btn';
+        minusBtn.textContent = '−';
+        minusBtn.addEventListener('click', function() {
+          var newQty = Math.max(0, (spiceQty[spice.id] || 0) - 1);
+          spiceQty[spice.id] = newQty;
+          spiceWeight[spice.id] = newQty > 0 ? spice.weight : null;
+          renderAll();
+        });
+
+        var qtyVal = document.createElement('span');
+        qtyVal.className = 'qty-value';
+        qtyVal.textContent = qty;
+
+        var plusBtn = document.createElement('button');
+        plusBtn.type = 'button';
+        plusBtn.className = 'qty-btn';
+        plusBtn.textContent = '+';
+        plusBtn.addEventListener('click', function() {
+          spiceQty[spice.id] = (spiceQty[spice.id] || 0) + 1;
+          spiceWeight[spice.id] = spice.weight;
+          renderAll();
+        });
+
+        qtyRow.appendChild(minusBtn);
+        qtyRow.appendChild(qtyVal);
+        qtyRow.appendChild(plusBtn);
+        controlsDiv.appendChild(qtyRow);
+
+        if (qty > 0) {
+          var totalSpan = document.createElement('div');
+          totalSpan.className = 'spice-line-total';
+          totalSpan.textContent = '€' + lineTotal.toFixed(2);
+          controlsDiv.appendChild(totalSpan);
+        }
+
+        card.appendChild(emojiDiv);
+        card.appendChild(infoDiv);
+        card.appendChild(controlsDiv);
+        grid.appendChild(card);
+      })(SPICES[i]);
     }
   }
 
@@ -1490,6 +1696,7 @@ header p {
                 btn.type = 'button';
                 if (prepWeight[key] === w) btn.className += ' chosen';
                 btn.textContent = w >= 1000 ? (w / 1000) + 'kg' : w + 'g';
+                if (getSurcharge(prep, w) > 0) btn.textContent += ' (+€' + getSurcharge(prep, w).toFixed(2) + ')';
 
                 if (w < prep.minWeight) {
                   btn.disabled = true;
@@ -1528,6 +1735,10 @@ header p {
     }
   }
 
+  function getSurcharge(prep, weight) {
+    return (prep.id === 'cleaned' && weight === 500) ? CLEANED_500G_SURCHARGE : 0;
+  }
+
   function hasCurryOrFry() {
     for (var i = 0; i < FISH.length; i++) {
       for (var j = 0; j < PREPS.length; j++) {
@@ -1543,7 +1754,7 @@ header p {
   function hasRawFish() {
     for (var i = 0; i < FISH.length; i++) {
       for (var j = 0; j < PREPS.length; j++) {
-        if (PREPS[j].id === 'cleaned' || PREPS[j].id === 'uncleaned') {
+        if (PREPS[j].id === 'cleaned') {
           var key = FISH[i].id + '_' + PREPS[j].id;
           if (prepActive[key] && prepWeight[key]) return true;
         }
@@ -1610,37 +1821,6 @@ header p {
       })(spicyChoices[s]);
     }
 
-    // Delivery day
-    var dayContainer = document.getElementById('delivery-day-options');
-    dayContainer.innerHTML = '';
-    // If current deliveryDay is now disabled, clear it — but never auto-select
-    for (var dd = 0; dd < DELIVERY_DAYS.length; dd++) {
-      if (DELIVERY_DAYS[dd].id === deliveryDay && !DELIVERY_DAYS[dd].enabled) {
-        deliveryDay = null;
-      }
-    }
-
-    for (var d = 0; d < DELIVERY_DAYS.length; d++) {
-      (function(choice) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'option-btn';
-        if (deliveryDay === choice.id) btn.className += ' active';
-        if (!choice.enabled) {
-          btn.disabled = true;
-          btn.style.opacity = '0.4';
-          btn.style.cursor = 'not-allowed';
-        }
-        btn.textContent = choice.label;
-        btn.addEventListener('click', function() {
-          if (btn.disabled) return;
-          deliveryDay = (deliveryDay === choice.id) ? null : choice.id;
-          renderAll();
-        });
-        dayContainer.appendChild(btn);
-      })(DELIVERY_DAYS[d]);
-    }
-
     // Delivery time
     var timeContainer = document.getElementById('delivery-time-options');
     var timeHint = document.getElementById('delivery-time-hint');
@@ -1675,7 +1855,7 @@ header p {
       })(timeChoices[t]);
     }
     if (!hasRaw) {
-      timeHint.textContent = '"Before 12:00" is available only for raw fish (Cleaned & Uncleaned)';
+      timeHint.textContent = '"Before 12:00" is available only for raw (cleaned) fish';
       timeHint.style.display = '';
     } else {
       timeHint.style.display = 'none';
@@ -1705,10 +1885,11 @@ header p {
         if (prepActive[key] && prepWeight[key]) {
           var price = PRICES[fish.id] ? PRICES[fish.id][prep.id] : null;
           if (price !== null && price !== undefined) {
-            var lineTotal = price * (prepWeight[key] / 500);
+            var surcharge = getSurcharge(prep, prepWeight[key]);
+            var lineTotal = price * (prepWeight[key] / 500) + surcharge;
             grandTotal += lineTotal;
             var weightLabel = prepWeight[key] >= 1000 ? (prepWeight[key] / 1000) + 'kg' : prepWeight[key] + 'g';
-            fishLines.push({ prep: prep.label, weight: weightLabel, total: lineTotal });
+            fishLines.push({ prep: prep.label, weight: weightLabel, total: lineTotal, surcharge: surcharge });
           }
         }
       }
@@ -1727,7 +1908,7 @@ header p {
           var lineDiv = document.createElement('div');
           lineDiv.className = 'summary-prep-line';
           var leftSpan = document.createElement('span');
-          leftSpan.textContent = fishLines[l].prep + ' \u2014 ' + fishLines[l].weight;
+          leftSpan.textContent = fishLines[l].prep + ' \u2014 ' + fishLines[l].weight + (fishLines[l].surcharge > 0 ? ' (+\u20AC' + fishLines[l].surcharge.toFixed(2) + ' surcharge)' : '');
           var rightSpan = document.createElement('span');
           rightSpan.textContent = '\u20AC' + fishLines[l].total.toFixed(2);
           lineDiv.appendChild(leftSpan);
@@ -1767,6 +1948,37 @@ header p {
         spDiv.appendChild(spLineDiv);
 
         summary.appendChild(spDiv);
+      }
+    }
+
+    // Spices
+    for (var spi = 0; spi < SPICES.length; spi++) {
+      var spice = SPICES[spi];
+      if (spiceWeight[spice.id] && spiceQty[spice.id] > 0) {
+        hasItem = true;
+        var spiceQtyVal = spiceQty[spice.id];
+        var spiceLineTotal = spice.price * spiceQtyVal;
+        grandTotal += spiceLineTotal;
+
+        var spiceDiv = document.createElement('div');
+        spiceDiv.className = 'summary-item';
+
+        var spiceNameDiv = document.createElement('div');
+        spiceNameDiv.className = 'summary-fish-name';
+        spiceNameDiv.textContent = spice.emoji + ' ' + spice.name;
+        spiceDiv.appendChild(spiceNameDiv);
+
+        var spiceLineDiv = document.createElement('div');
+        spiceLineDiv.className = 'summary-prep-line';
+        var spiceLeft = document.createElement('span');
+        spiceLeft.textContent = spiceWeight[spice.id] + 'g × ' + spiceQtyVal;
+        var spiceRight = document.createElement('span');
+        spiceRight.textContent = '€' + spiceLineTotal.toFixed(2);
+        spiceLineDiv.appendChild(spiceLeft);
+        spiceLineDiv.appendChild(spiceRight);
+        spiceDiv.appendChild(spiceLineDiv);
+
+        summary.appendChild(spiceDiv);
       }
     }
 
@@ -1876,19 +2088,17 @@ header p {
         if (prepActive[key] && prepWeight[key]) {
           var price = PRICES[fish.id] ? PRICES[fish.id][prep.id] : null;
           if (price !== null && price !== undefined) {
-            var lineTotal = price * (prepWeight[key] / 500);
+            var surcharge = getSurcharge(prep, prepWeight[key]);
+            var lineTotal = price * (prepWeight[key] / 500) + surcharge;
             grandTotal += lineTotal;
             var weightLabel = prepWeight[key] >= 1000 ? (prepWeight[key] / 1000) + 'kg' : prepWeight[key] + 'g';
-            var lineStr = prep.label + ' - ' + weightLabel + ' = \u20AC' + lineTotal.toFixed(2);
-            // Add net weight for non-uncleaned preps
-            if (prep.id !== 'uncleaned') {
-              var wastePct = fishHeadAnswer === 'yes' ? (fish.wastage_with_head_percentage || 0) : (fish.wastage_without_head_percentage || 0);
-              if (wastePct > 0) {
-                if (wastePct > maxWastePct) maxWastePct = wastePct;
-                var netGrams = Math.round(prepWeight[key] * (1 - wastePct / 100));
-                var netLabel = netGrams >= 1000 ? (netGrams / 1000).toFixed(1) + 'kg' : netGrams + 'g';
-                lineStr += ' (net ~' + netLabel + ')';
-              }
+            var lineStr = prep.label + ' - ' + weightLabel + (surcharge > 0 ? ' (+\u20AC' + surcharge.toFixed(2) + ' surcharge)' : '') + ' = \u20AC' + lineTotal.toFixed(2);
+            var wastePct = fishHeadAnswer === 'yes' ? (fish.wastage_with_head_percentage || 0) : (fish.wastage_without_head_percentage || 0);
+            if (wastePct > 0) {
+              if (wastePct > maxWastePct) maxWastePct = wastePct;
+              var netGrams = Math.round(prepWeight[key] * (1 - wastePct / 100));
+              var netLabel = netGrams >= 1000 ? (netGrams / 1000).toFixed(1) + 'kg' : netGrams + 'g';
+              lineStr += ' (net ~' + netLabel + ')';
             }
             fishLines.push(lineStr);
           }
@@ -1914,6 +2124,17 @@ header p {
       }
     }
 
+    // Spices
+    for (var spi = 0; spi < SPICES.length; spi++) {
+      var spice = SPICES[spi];
+      if (spiceWeight[spice.id] && spiceQty[spice.id] > 0) {
+        var spiceTotal = spice.price * spiceQty[spice.id];
+        grandTotal += spiceTotal;
+        lines.push('*' + spice.name + '*' + (spice.origin ? ' (' + spice.origin + ')' : ''));
+        lines.push('  ' + spiceWeight[spice.id] + 'g \u00D7 ' + spiceQty[spice.id] + ' = \u20AC' + spiceTotal.toFixed(2));
+      }
+    }
+
     lines.push('');
     if (fishHeadAnswer) {
       lines.push('Fish head: ' + (fishHeadAnswer === 'yes' ? 'Yes' : 'No'));
@@ -1923,10 +2144,6 @@ header p {
       lines.push('Spicy level: ' + (spicyMap[spicyLevel] || spicyLevel));
     }
 
-    if (deliveryDay) {
-      var dayMap = { 'saturday': 'Saturday', 'sunday': 'Sunday' };
-      lines.push('Delivery day: ' + (dayMap[deliveryDay] || deliveryDay));
-    }
     if (deliveryTime) {
       var timeMap = { 'before-12': 'Before 12:00', '13-14': 'Between 13:00 and 14:00', 'after-14': 'After 14:00' };
       lines.push('Delivery time: ' + (timeMap[deliveryTime] || deliveryTime));
@@ -1936,6 +2153,8 @@ header p {
     if (specialInstructions) {
       lines.push('Special allergen instructions: ' + specialInstructions);
     }
+
+    lines.push('*Delivery Address:* ' + custPostal + (custDoor ? ' #' + custDoor : ''));
 
     if (maxWastePct > 0) {
       lines.push('');
@@ -1962,7 +2181,6 @@ header p {
   function buildOrderData() {
     var c = getCustomerDetails();
     var spicyMap = { 'low': 'Low', 'medium': 'Medium', 'high': 'High', 'no-preference': 'No preference' };
-    var dayMap = { 'saturday': 'Saturday', 'sunday': 'Sunday' };
     var timeMap = { 'before-12': 'Before 12:00', '13-14': 'Between 13:00 and 14:00', 'after-14': 'After 14:00' };
 
     // Build order items string
@@ -1976,10 +2194,11 @@ header p {
         if (prepActive[key] && prepWeight[key]) {
           var price = PRICES[fish.id] ? PRICES[fish.id][prep.id] : null;
           if (price !== null && price !== undefined) {
-            var lineTotal = price * (prepWeight[key] / 500);
+            var surcharge = getSurcharge(prep, prepWeight[key]);
+            var lineTotal = price * (prepWeight[key] / 500) + surcharge;
             grandTotal += lineTotal;
             var wLabel = prepWeight[key] >= 1000 ? (prepWeight[key] / 1000) + 'kg' : prepWeight[key] + 'g';
-            orderLines.push(fish.name + ' - ' + prep.label + ' - ' + wLabel + ' = EUR ' + lineTotal.toFixed(2));
+            orderLines.push(fish.name + ' - ' + prep.label + ' - ' + wLabel + (surcharge > 0 ? ' (+EUR ' + surcharge.toFixed(2) + ' surcharge)' : '') + ' = EUR ' + lineTotal.toFixed(2));
           }
         }
       }
@@ -1991,6 +2210,15 @@ header p {
         var spTotal = sp.price_per_200g * (specialWeight[sp.id] / 200) * specialQty[sp.id];
         grandTotal += spTotal;
         orderLines.push(sp.name + ' - ' + specialWeight[sp.id] + 'g x' + specialQty[sp.id] + ' = EUR ' + spTotal.toFixed(2));
+      }
+    }
+
+    for (var spi = 0; spi < SPICES.length; spi++) {
+      var spice = SPICES[spi];
+      if (spiceWeight[spice.id] && spiceQty[spice.id] > 0) {
+        var spiceTotal = spice.price * spiceQty[spice.id];
+        grandTotal += spiceTotal;
+        orderLines.push(spice.name + ' - ' + spiceWeight[spice.id] + 'g x' + spiceQty[spice.id] + ' = EUR ' + spiceTotal.toFixed(2));
       }
     }
 
@@ -2006,7 +2234,6 @@ header p {
       discount: discountApplied ? '10%' : '',
       fishHead: fishHeadAnswer ? (fishHeadAnswer === 'yes' ? 'Yes' : 'No') : '',
       spicyLevel: spicyLevel ? (spicyMap[spicyLevel] || spicyLevel) : '',
-      deliveryDay: deliveryDay ? (dayMap[deliveryDay] || deliveryDay) : '',
       deliveryTime: deliveryTime ? (timeMap[deliveryTime] || deliveryTime) : '',
       specialInstructions: document.getElementById('special-instructions').value.trim()
     };
@@ -2132,9 +2359,9 @@ header p {
     var el2 = document.getElementById('delivery-order-text');
     if (el2) {
       if (enabledDays.length === 1) {
-        el2.innerHTML = 'Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on ' + enabledDays[0] + '.';
+        el2.innerHTML = 'Place your order <strong>before Thursday</strong> and receive it <strong>at your home before 14:00</strong> on ' + enabledDays[0] + '.';
       } else {
-        el2.innerHTML = 'Place your order <strong>before Thursday 12:00</strong> and receive it <strong>at your home before 14:00</strong> on your preferred delivery day.';
+        el2.innerHTML = 'Place your order <strong>before Thursday</strong> and receive it <strong>at your home before 14:00</strong> on your preferred delivery day.';
       }
     }
   }
