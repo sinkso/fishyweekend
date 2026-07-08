@@ -47,18 +47,22 @@ Edit the `PREPS` array. Each entry needs:
 
 ```js
 var PREPS = [
-  { id: 'uncleaned', label: 'Raw (Uncleaned & Whole Fish)', icon: '🐟', minWeight: 1000 },
-  { id: 'cleaned',   label: 'Raw (Cleaned)',   icon: '✂️', minWeight: 1000 },
+  { id: 'cleaned',   label: 'Raw (Cleaned)',   icon: '✂️', minWeight: 500  },
   { id: 'curry',     label: 'Curry',        icon: '🍛', minWeight: 500  },
   { id: 'fry',     label: 'Fry',        icon: '🍳', minWeight: 500  },
 ];
 ```
 
+> **Raw (Uncleaned & Whole Fish)** was removed from `PREPS` — Fishy Weekend no longer offers uncleaned/whole fish, only cleaned raw fish, curry, and fry. The `Fish` Google Sheet tab may still have an `uncleaned` price column; it's simply ignored now (harmless to leave or remove).
+
 **Weight rules:**
-- `Curry` and `Fry` — minimum 500g, all weight options available
-- `Raw Uncleaned` and `Raw Cleaned` — minimum 1000g (500g button is greyed out and disabled)
+- `Curry`, `Fry`, and `Raw Cleaned` — minimum 500g, all weight options available
 
 > To change the minimum for a prep type, update its `minWeight` value.
+
+**500g surcharge for Raw (Cleaned):** ordering Raw (Cleaned) fish at 500g adds a flat surcharge, set via `CLEANED_500G_SURCHARGE` (currently €1.00) near the `PREPS`/`WEIGHTS` config. It only applies when `prep.id === 'cleaned' && weight === 500` (see `getSurcharge()`); Curry, Fry, and 1kg+ Raw Cleaned orders are unaffected. The surcharge is shown directly on the 500g weight button (e.g. "500g (+€1.00)") and is added into the line total everywhere it's calculated — the order summary, the WhatsApp message, and the Google Sheets order log — each annotated with "(+€1.00 surcharge)" so it's never a silent price bump.
+
+> To change the surcharge amount, edit `CLEANED_500G_SURCHARGE`. To remove it, set it to `0` (the 500g option stays enabled either way, since `minWeight` is now `500`).
 
 ---
 
@@ -68,20 +72,20 @@ Prices are **per 500g** and vary by fish and preparation type. They are defined 
 
 ```js
 var PRICES = {
-  anchovy:  { cleaned: 8.00,  curry: 10.00, fry: 12.00, uncleaned: 6.00  },
-  dorade:   { cleaned: 10.00, curry: 11.50, fry: 14.00, uncleaned: 8.00  },
-  pomfret:  { cleaned: null,  curry: null,  fry: null,  uncleaned: null   },
-  prawns:   { cleaned: 11.00, curry: 12.50, fry: 15.00, uncleaned: 9.00  },
-  salmon:   { cleaned: 10.00, curry: 11.50, fry: 14.00, uncleaned: 8.00  },
-  sardien:  { cleaned: null,  curry: null,  fry: null,  uncleaned: null   },
-  zeebaars: { cleaned: 10.00, curry: 11.50, fry: 14.00, uncleaned: 8.00  },
+  anchovy:  { cleaned: 8.00,  curry: 10.00, fry: 12.00 },
+  dorade:   { cleaned: 10.00, curry: 11.50, fry: 14.00 },
+  pomfret:  { cleaned: null,  curry: null,  fry: null  },
+  prawns:   { cleaned: 11.00, curry: 12.50, fry: 15.00 },
+  salmon:   { cleaned: 10.00, curry: 11.50, fry: 14.00 },
+  sardien:  { cleaned: null,  curry: null,  fry: null  },
+  zeebaars: { cleaned: 10.00, curry: 11.50, fry: 14.00 },
 };
 ```
 
 - All prices are per 500g gross weight, as per the official Fishy Weekend price list
 - `null` means the fish is not currently available in that preparation — the option should be hidden or disabled in the UI
 - **Pomfret** and **Sardien** are fully greyed out for now; fill in their prices when they become available
-- The prep keys (`cleaned`, `curry`, `fry`, `uncleaned`) must match the `id` fields in the `PREPS` array exactly
+- The prep keys (`cleaned`, `curry`, `fry`) must match the `id` fields in the `PREPS` array exactly
 - Price for a given selection is looked up as `PRICES[fish.id][prep.id]`, then multiplied by `weight / 500`
 
 **To update a price:** change the number in the relevant cell.
@@ -97,6 +101,52 @@ var WEIGHTS = [500, 1000, 1500, 2000];
 ```
 
 These are the selectable weights in grams. Add or remove values here to change what customers can choose. The `minWeight` rule on each prep type will automatically disable any options below the threshold.
+
+---
+
+### Spices
+
+A separate section, styled and behaving exactly like Special Products, for whole/ground spices sourced from a specific origin. Each spice has **one fixed weight and one fixed price** (unlike fish/specials which offer multiple weight options), but the interaction pattern is identical: tap the pack-size chip to select it (revealing a quantity stepper), tap again — or step the quantity down to 0 — to deselect. This keeps both sections consistent for the customer and lets a spice later gain a second pack size without changing the interaction model.
+
+Edit the `SPICES` array in the script. Each entry needs:
+- `id` — unique lowercase slug
+- `name` — display name
+- `origin` — shown under the name (e.g. `'Wayanad, Kerala'`, `'Iran'`)
+- `emoji` — icon shown on the card
+- `available` — if false, the card is greyed out and disabled
+- `weight` — the pack size in grams sold per unit (e.g. `50`, `100`, or `1` for saffron sold by the gram)
+- `price` — price in EUR for that one pack (i.e. per `weight` grams, not per 500g/200g)
+
+```js
+var SPICES = [
+  { id: 'cardamom', name: 'Cardamom', origin: 'Wayanad, Kerala', emoji: '🌿', available: true, weight: 50,  price: 1.00 },
+  { id: 'cloves',   name: 'Cloves',   origin: 'Wayanad, Kerala', emoji: '🌸', available: true, weight: 50,  price: 1.00 },
+  { id: 'cinnamon', name: 'Cinnamon', origin: 'Wayanad, Kerala', emoji: '🪵', available: true, weight: 50,  price: 1.00 },
+  { id: 'pepper',   name: 'Pepper',   origin: 'Wayanad, Kerala', emoji: '⚫', available: true, weight: 100, price: 1.00 },
+  { id: 'javithri', name: 'Javithri', origin: 'Wayanad, Kerala', emoji: '🍂', available: true, weight: 50,  price: 1.00 },
+  { id: 'saffron',  name: 'Saffron',  origin: 'Iran',            emoji: '🌼', available: true, weight: 1,   price: 1.00 }
+];
+```
+
+> All prices above are placeholder €1.00 values — update them to real prices before going live.
+> To add a spice: append a new line following the same format.
+> To remove a spice: delete its line.
+> Line total for a spice = `price × quantity` (quantity is however many packs of `weight` grams the customer orders).
+
+`SHOW_SPICES` (boolean, defaults to `true`) controls whether the whole Spices section renders, same pattern as `SHOW_FISH` / `SHOW_SPECIAL`.
+
+**Google Sheet integration:** like Fish and Specials, the Spices list can be driven from a `Spices` tab in the same Google Sheet (see `SPICES_CSV_URL` / `SPREADSHEET_ID` in the script). If you want to manage spices from the sheet instead of editing code, add a tab named exactly `Spices` with these column headers in row 1:
+
+| id | name | origin | emoji | available | weight | price |
+|----|------|--------|-------|-----------|--------|-------|
+| cardamom | Cardamom | Wayanad, Kerala | 🌿 | TRUE | 50 | 1.00 |
+| cloves | Cloves | Wayanad, Kerala | 🌸 | TRUE | 50 | 1.00 |
+| cinnamon | Cinnamon | Wayanad, Kerala | 🪵 | TRUE | 50 | 1.00 |
+| pepper | Pepper | Wayanad, Kerala | ⚫ | TRUE | 100 | 1.00 |
+| javithri | Javithri | Wayanad, Kerala | 🍂 | TRUE | 50 | 1.00 |
+| saffron | Saffron | Iran | 🌼 | TRUE | 1 | 1.00 |
+
+`available` must be the literal text `TRUE` (any other value, including blank, is treated as unavailable). If the `Spices` tab is missing or empty, the hardcoded defaults above are used instead — same fallback behavior as Fish/Specials.
 
 ---
 
