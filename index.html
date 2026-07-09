@@ -952,9 +952,10 @@ header p {
   <div class="section-title">Additional Details</div>
   <div class="questions-section">
     <div id="fish-questions-wrapper">
-      <div class="question-group">
+      <div class="question-group disabled-group" id="fishhead-group">
         <label>Do you need Fish head?</label>
         <div class="option-buttons" id="fishhead-options"></div>
+        <div class="disabled-hint" id="fishhead-hint">Select a fish item to choose fish head preference</div>
       </div>
       <div class="question-group disabled-group" id="spicy-group">
         <label>What Spicy Level do you need for curry/fry?</label>
@@ -1357,7 +1358,7 @@ header p {
 
   function isAdditionalDetailsComplete() {
     if (SHOW_FISH) {
-      if (!fishHeadAnswer) return false;
+      if (hasFishOrder() && !fishHeadAnswer) return false;
       if (!deliveryTime) return false;
       if (hasCurryOrFry() && !spicyLevel) return false;
     }
@@ -1367,7 +1368,7 @@ header p {
   function getMissingDetails() {
     var missing = [];
     if (SHOW_FISH) {
-      if (!fishHeadAnswer) missing.push('Fish head preference');
+      if (hasFishOrder() && !fishHeadAnswer) missing.push('Fish head preference');
       if (hasCurryOrFry() && !spicyLevel) missing.push('Spicy level');
       if (!deliveryTime) missing.push('Delivery time');
     }
@@ -1751,6 +1752,16 @@ header p {
     return false;
   }
 
+  function hasFishOrder() {
+    for (var i = 0; i < FISH.length; i++) {
+      for (var j = 0; j < PREPS.length; j++) {
+        var key = FISH[i].id + '_' + PREPS[j].id;
+        if (prepActive[key] && prepWeight[key]) return true;
+      }
+    }
+    return false;
+  }
+
   function hasRawFish() {
     for (var i = 0; i < FISH.length; i++) {
       for (var j = 0; j < PREPS.length; j++) {
@@ -1765,12 +1776,23 @@ header p {
 
   function renderQuestions() {
     // Fish head
+    var headGroup = document.getElementById('fishhead-group');
+    var headHint = document.getElementById('fishhead-hint');
     var headContainer = document.getElementById('fishhead-options');
     headContainer.innerHTML = '';
     var headChoices = [
       { value: 'yes', label: 'Yes' },
       { value: 'no',  label: 'No' }
     ];
+    var hasFishSelection = hasFishOrder();
+    if (hasFishSelection) {
+      headGroup.className = 'question-group';
+      headHint.style.display = 'none';
+    } else {
+      headGroup.className = 'question-group disabled-group';
+      headHint.style.display = '';
+      fishHeadAnswer = null;
+    }
     for (var h = 0; h < headChoices.length; h++) {
       (function(choice) {
         var btn = document.createElement('button');
@@ -1778,7 +1800,13 @@ header p {
         btn.className = 'option-btn';
         if (fishHeadAnswer === choice.value) btn.className += ' active';
         btn.textContent = choice.label;
+        if (!hasFishSelection) {
+          btn.disabled = true;
+          btn.style.opacity = '0.4';
+          btn.style.cursor = 'not-allowed';
+        }
         btn.addEventListener('click', function() {
+          if (!hasFishSelection) return;
           fishHeadAnswer = (fishHeadAnswer === choice.value) ? null : choice.value;
           renderAll();
         });
