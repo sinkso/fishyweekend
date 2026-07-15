@@ -962,6 +962,11 @@ header p {
         <div class="option-buttons" id="spicy-options"></div>
         <div class="disabled-hint" id="spicy-hint">Select a Curry or Fry preparation to choose spicy level</div>
       </div>
+      <div class="question-group disabled-group" id="cut-type-group">
+        <label>Choose a type of cut</label>
+        <div class="option-buttons" id="cut-type-options"></div>
+        <div class="disabled-hint" id="cut-type-hint">Select a fish item to choose a cut type</div>
+      </div>
       <div class="question-group">
         <label>Preferred delivery time on Saturday</label>
         <div class="option-buttons" id="delivery-time-options"></div>
@@ -1330,6 +1335,7 @@ header p {
   var prepWeight   = {};
   var fishHeadAnswer = null;   // 'yes' or 'no'
   var spicyLevel     = null;   // 'low', 'medium', 'high', 'no-preference'
+  var cutType        = null;   // 'thin-medium', 'thick-gravy', 'whole-fish', 'butterfly-bbq', 'no-preference'
   var deliveryTime   = null;   // 'before-12', '13-14', 'after-14'
   var hasCoupon      = null;   // 'yes' or 'no'
   var couponCode     = '';
@@ -1849,6 +1855,47 @@ header p {
       })(spicyChoices[s]);
     }
 
+    // Cut type
+    var cutTypeGroup = document.getElementById('cut-type-group');
+    var cutTypeHint = document.getElementById('cut-type-hint');
+    var cutTypeContainer = document.getElementById('cut-type-options');
+    cutTypeContainer.innerHTML = '';
+    var cutTypeChoices = [
+      { value: 'thin-medium', label: 'Thin / Medium for fry' },
+      { value: 'thick-gravy', label: 'Thick for gravy' },
+      { value: 'whole-fish', label: 'Whole fish' },
+      { value: 'butterfly-bbq', label: 'Butterfly cut for BBQ' },
+      { value: 'no-preference', label: 'No preference' }
+    ];
+    if (hasFishSelection) {
+      cutTypeGroup.className = 'question-group';
+      cutTypeHint.style.display = 'none';
+    } else {
+      cutTypeGroup.className = 'question-group disabled-group';
+      cutTypeHint.style.display = '';
+      cutType = null;
+    }
+    for (var c = 0; c < cutTypeChoices.length; c++) {
+      (function(choice) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'option-btn';
+        if (cutType === choice.value) btn.className += ' active';
+        btn.textContent = choice.label;
+        if (!hasFishSelection) {
+          btn.disabled = true;
+          btn.style.opacity = '0.4';
+          btn.style.cursor = 'not-allowed';
+        }
+        btn.addEventListener('click', function() {
+          if (!hasFishSelection) return;
+          cutType = (cutType === choice.value) ? null : choice.value;
+          renderAll();
+        });
+        cutTypeContainer.appendChild(btn);
+      })(cutTypeChoices[c]);
+    }
+
     // Delivery time
     var timeContainer = document.getElementById('delivery-time-options');
     var timeHint = document.getElementById('delivery-time-hint');
@@ -2172,6 +2219,17 @@ header p {
       lines.push('Spicy level: ' + (spicyMap[spicyLevel] || spicyLevel));
     }
 
+    if (cutType) {
+      var cutTypeMap = {
+        'thin-medium': 'Thin / Medium for fry',
+        'thick-gravy': 'Thick for gravy',
+        'whole-fish': 'Whole fish',
+        'butterfly-bbq': 'Butterfly cut for BBQ',
+        'no-preference': 'No preference'
+      };
+      lines.push('Type of cut: ' + (cutTypeMap[cutType] || cutType));
+    }
+
     if (deliveryTime) {
       var timeMap = { 'before-12': 'Before 12:00', '13-14': 'Between 13:00 and 14:00', 'after-14': 'After 14:00' };
       lines.push('Delivery time: ' + (timeMap[deliveryTime] || deliveryTime));
@@ -2210,6 +2268,13 @@ header p {
     var c = getCustomerDetails();
     var spicyMap = { 'low': 'Low', 'medium': 'Medium', 'high': 'High', 'no-preference': 'No preference' };
     var timeMap = { 'before-12': 'Before 12:00', '13-14': 'Between 13:00 and 14:00', 'after-14': 'After 14:00' };
+    var cutTypeMap = {
+      'thin-medium': 'Thin / Medium for fry',
+      'thick-gravy': 'Thick for gravy',
+      'whole-fish': 'Whole fish',
+      'butterfly-bbq': 'Butterfly cut for BBQ',
+      'no-preference': 'No preference'
+    };
 
     // Build order items string
     var orderLines = [];
@@ -2262,6 +2327,7 @@ header p {
       discount: discountApplied ? '10%' : '',
       fishHead: fishHeadAnswer ? (fishHeadAnswer === 'yes' ? 'Yes' : 'No') : '',
       spicyLevel: spicyLevel ? (spicyMap[spicyLevel] || spicyLevel) : '',
+      cutType: cutType ? (cutTypeMap[cutType] || cutType) : '',
       deliveryTime: deliveryTime ? (timeMap[deliveryTime] || deliveryTime) : '',
       specialInstructions: document.getElementById('special-instructions').value.trim()
     };
