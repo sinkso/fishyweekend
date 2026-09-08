@@ -2074,11 +2074,11 @@ header p {
         subtotalDiv.appendChild(subtotalValue);
         summary.appendChild(subtotalDiv);
 
-        var discountAmount = grandTotal * 0.10;
+        var discountAmount = grandTotal * 0.05;
         var discountDiv = document.createElement('div');
         discountDiv.className = 'summary-discount';
         var discountLabel = document.createElement('span');
-        discountLabel.textContent = 'Coupon discount (10%)';
+        discountLabel.textContent = 'Coupon discount (5%)';
         var discountValue = document.createElement('span');
         discountValue.textContent = '-\u20AC' + discountAmount.toFixed(2);
         discountDiv.appendChild(discountLabel);
@@ -2249,9 +2249,9 @@ header p {
     }
     lines.push('');
     if (discountApplied) {
-      var discountAmt = grandTotal * 0.10;
+      var discountAmt = grandTotal * 0.05;
       lines.push('Subtotal: \u20AC' + grandTotal.toFixed(2));
-      lines.push('Discount (10%): -\u20AC' + discountAmt.toFixed(2));
+      lines.push('Discount (5%): -\u20AC' + discountAmt.toFixed(2));
       grandTotal = grandTotal - discountAmt;
     }
     lines.push('*Total: \u20AC' + grandTotal.toFixed(2) + '*');
@@ -2315,7 +2315,7 @@ header p {
       }
     }
 
-    var finalTotal = discountApplied ? grandTotal * 0.90 : grandTotal;
+    var finalTotal = discountApplied ? grandTotal * 0.95 : grandTotal;
     return {
       name: c.name,
       phone: c.phone,
@@ -2324,7 +2324,7 @@ header p {
       orderItems: orderLines.join('\n'),
       grandTotal: 'EUR ' + finalTotal.toFixed(2),
       couponCode: discountApplied ? couponCode : '',
-      discount: discountApplied ? '10%' : '',
+      discount: discountApplied ? '5%' : '',
       fishHead: fishHeadAnswer ? (fishHeadAnswer === 'yes' ? 'Yes' : 'No') : '',
       spicyLevel: spicyLevel ? (spicyMap[spicyLevel] || spicyLevel) : '',
       cutType: cutType ? (cutTypeMap[cutType] || cutType) : '',
@@ -2402,7 +2402,7 @@ header p {
     couponCode = this.value.trim();
     discountApplied = couponCode.length > 0;
     var statusEl = document.getElementById('coupon-status');
-    statusEl.textContent = discountApplied ? '10% discount applied!' : '';
+    statusEl.textContent = discountApplied ? '5% discount applied!' : '';
     renderSummary();
   });
 
